@@ -96,11 +96,13 @@ fn main() {
         gl::BindVertexArray(VAO);
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
 
-        //??
+        // we use only 1 VAO so the index of the location is 0
         gl::EnableVertexAttribArray(0);
-        //??
+        
+        // clean up? I think this is not mandatory
+        // unbind VBO
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-        //??
+        // unbind VAO
         gl::BindVertexArray(0);
 
         (shader_program, VAO)
