@@ -14,3 +14,7 @@ image = "0.19.0"
 tobj = "0.1.6"
 num = "0.2.0"
 rand = "0.5.5"
+
+[[example]]
+name = "hello_triangle"
+path = "examples/getting_started/hello_triangle.rs"

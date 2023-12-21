@@ -68,17 +68,12 @@ fn main() {
         gl::DeleteShader(vertex_shader);
         gl::DeleteShader(fragment_shader);
 
-        let vertices: [f32; 12] = [
+        // vertices for a triangle
+        let vertices: [f32; 9] = [
             // x    y    z
-            -0.5, -0.5, 0.0,
-             0.5, -0.5, 0.0,
-            -0.5,  0.5, 0.0,
-             0.5,  0.5, 0.0
-        ];
-
-        let indices = [
-            0, 1, 2,
-            1, 2, 3
+            -0.5, -0.5, 0.0, // left
+             0.5, -0.5, 0.0, // right
+             0.0,  0.5, 0.0  // top
         ];
 
         // initialize vbo and vao
@@ -86,25 +81,19 @@ fn main() {
         // this buffer holds the data(vertices), and will be copied to the graphics card
         // VAO - vertex array object
         // object, holds how the data should be used
-        let (mut VBO, mut VAO, mut EBO) = (0, 0, 0);
+        let (mut VBO, mut VAO) = (0,0);
 
-        // set up opengl objects
-        gl::GenVertexArrays(1, &mut VAO);
+        // set openGL object for VBO and VAO
         gl::GenBuffers(1, &mut VBO);
-        gl::GenBuffers(1, &mut EBO);
 
-        // bind VAO first
-        gl::BindVertexArray(VAO);
-
-        // bind buffer to opengl state and fill with data
+        // bind buffer will set the buffer as the current OpenGl State
+        // then storing the data inside this buffer
         gl::BindBuffer(gl::ARRAY_BUFFER, VBO);
         gl::BufferData(gl::ARRAY_BUFFER, (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &vertices[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
 
-        // bind buffer to opengl state and fill with data
-        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, EBO);
-        gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, (indices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &indices[0] as *const i32 as *const c_void, gl::STATIC_DRAW);
-
-        //configurate VAO
+        // bind and configurate VAO
+        gl::GenVertexArrays(1, &mut VAO);
+        gl::BindVertexArray(VAO);
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
 
         // we use only 1 VAO so the index of the location is 0
@@ -127,7 +116,7 @@ fn main() {
     
             gl::UseProgram(program);
             gl::BindVertexArray(VAO);
-            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }
     
         // Swap front and back buffers
