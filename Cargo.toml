@@ -30,3 +30,7 @@ path = "examples/getting_started/exercise1.rs"
 [[example]]
 name = "exercise_1_2"
 path = "examples/getting_started/exercise2.rs"
+
+[[example]]
+name = "interpolation"
+path = "examples/getting_started/interpolation_triangle.rs"

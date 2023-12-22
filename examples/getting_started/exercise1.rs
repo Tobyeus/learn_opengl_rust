@@ -7,10 +7,11 @@ use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 
 use gl::types::*;
 
-////
+//
 // Exercise:
 // Try to draw 2 triangles next to each other using glDrawArrays by adding more vertices to your data
 // https://learnopengl.com/Getting-started/Hello-Triangle
+//
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
