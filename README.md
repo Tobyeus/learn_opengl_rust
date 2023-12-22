@@ -11,7 +11,7 @@ As of now, I will mainly code in the main.rs file of the src folder. Finished ch
 
 Make sure to use ```cargo build``` before running anything. The examples can be run via the command ```cargo run --example <example_name>```.
 
-List of the available examples:
+## List of the available examples:
 
 1. Getting started:
 - hello_triangle

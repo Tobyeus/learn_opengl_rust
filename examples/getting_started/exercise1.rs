@@ -7,6 +7,11 @@ use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 
 use gl::types::*;
 
+////
+// Exercise:
+// Try to draw 2 triangles next to each other using glDrawArrays by adding more vertices to your data
+// https://learnopengl.com/Getting-started/Hello-Triangle
+
 // Constants
 const WINDOW_WIDTH: u32 = 800;
 const WINDOW_HEIGHT:u32 = 600;
@@ -21,23 +26,13 @@ const vertexShaderSource: &str = r#"
     }
 "#;
 
-const fragmentShaderSource_orange: &str = r#"
+const fragmentShaderSource: &str = r#"
     #version 330 core
 
     out vec4 FragColor;
 
     void main() {
        FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-    }
-"#;
-
-const fragmentShaderSource_white: &str = r#"
-    #version 330 core
-
-    out vec4 FragColor;
-
-    void main() {
-       FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 "#;
 
@@ -51,7 +46,7 @@ fn main() {
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let (program_orange, program_white, VAO1, VAO2) = unsafe {
+    let (program, VAO) = unsafe {
 
         // vertex shader
         let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
@@ -61,51 +56,34 @@ fn main() {
         gl::CompileShader(vertex_shader);
 
         // fragment shader
-        let fragment_shader_orange = gl::CreateShader(gl::FRAGMENT_SHADER);
-        let c_str_frag = CString::new(fragmentShaderSource_orange.as_bytes()).unwrap();
+        let fragment_shader = gl::CreateShader(gl::FRAGMENT_SHADER);
+        let c_str_frag = CString::new(fragmentShaderSource.as_bytes()).unwrap();
         // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(fragment_shader_orange, 1, &c_str_frag.as_ptr(), ptr::null());
-        gl::CompileShader(fragment_shader_orange);
-
-        // fragment shader
-        let fragment_shader_white = gl::CreateShader(gl::FRAGMENT_SHADER);
-        let c_str_frag = CString::new(fragmentShaderSource_white.as_bytes()).unwrap();
-        // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(fragment_shader_white, 1, &c_str_frag.as_ptr(), ptr::null());
-        gl::CompileShader(fragment_shader_white);
+        gl::ShaderSource(fragment_shader, 1, &c_str_frag.as_ptr(), ptr::null());
+        gl::CompileShader(fragment_shader);
 
         // shader program
-        let shader_program_orange = gl::CreateProgram();
-        let shader_program_white = gl::CreateProgram();
+        let shader_program = gl::CreateProgram();
         // link shaders
-        gl::AttachShader(shader_program_orange, vertex_shader);
-        gl::AttachShader(shader_program_orange, fragment_shader_orange);
-        gl::LinkProgram(shader_program_orange);
-
-        gl::AttachShader(shader_program_white, vertex_shader);
-        gl::AttachShader(shader_program_white, fragment_shader_white);
-        gl::LinkProgram(shader_program_white);
+        gl::AttachShader(shader_program, vertex_shader);
+        gl::AttachShader(shader_program, fragment_shader);
+        gl::LinkProgram(shader_program);
 
         // clean up, delete shaders
         gl::DeleteShader(vertex_shader);
-        gl::DeleteShader(fragment_shader_orange);
-        gl::DeleteShader(fragment_shader_white);
+        gl::DeleteShader(fragment_shader);
 
-        let first_triangle: [f32; 9] = [
+        let vertices: [f32; 12] = [
             // x    y    z
             -0.5, -0.5, 0.0,
-            -0.1,  0.5, 0.0,
-            -0.1, -0.5, 0.0,
-        ];
-
-        let second_triangle: [f32; 9] = [
-             0.1,  0.5, 0.0,
-             0.1, -0.5, 0.0,
+             0.0,  0.5, 0.0,
+             0.0, -0.5, 0.0,
              0.5, -0.5, 0.0
         ];
 
         let indices = [
-            0, 1, 2
+            0, 1, 2,
+            1, 2, 3
         ];
 
         // initialize vbo and vao
@@ -113,36 +91,28 @@ fn main() {
         // this buffer holds the data(vertices), and will be copied to the graphics card
         // VAO - vertex array object
         // object, holds how the data should be used
-
-        let mut VBOs = [0, 0];
-        let mut VAOs = [0, 0];
+        let (mut VBO, mut VAO, mut EBO) = (0, 0, 0);
 
         // set up opengl objects
-        gl::GenVertexArrays(2, VAOs.as_mut_ptr());
-        gl::GenBuffers(2, VBOs.as_mut_ptr());
+        gl::GenVertexArrays(1, &mut VAO);
+        gl::GenBuffers(1, &mut VBO);
+        gl::GenBuffers(1, &mut EBO);
 
         // bind VAO first
-        gl::BindVertexArray(VAOs[0]);
+        gl::BindVertexArray(VAO);
 
         // bind buffer to opengl state and fill with data
-        gl::BindBuffer(gl::ARRAY_BUFFER, VBOs[0]);
-        gl::BufferData(gl::ARRAY_BUFFER, (first_triangle.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &first_triangle[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
+        gl::BindBuffer(gl::ARRAY_BUFFER, VBO);
+        gl::BufferData(gl::ARRAY_BUFFER, (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &vertices[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
+
+        // bind buffer to opengl state and fill with data
+        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, EBO);
+        gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, (indices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &indices[0] as *const i32 as *const c_void, gl::STATIC_DRAW);
 
         //configurate VAO
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
 
         // we use only 1 VAO so the index of the location is 0
-        gl::EnableVertexAttribArray(0);
-
-        gl::BindVertexArray(VAOs[1]);
-
-        // bind buffer to opengl state and fill with data
-        gl::BindBuffer(gl::ARRAY_BUFFER, VBOs[1]);
-        gl::BufferData(gl::ARRAY_BUFFER, (second_triangle.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &second_triangle[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
-
-        //configurate VAO
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
-
         gl::EnableVertexAttribArray(0);
         
         // clean up? I think this is not mandatory
@@ -151,7 +121,7 @@ fn main() {
         // unbind VAO
         gl::BindVertexArray(0);
 
-        (shader_program_orange, shader_program_white, VAOs[0], VAOs[1])
+        (shader_program, VAO)
     };
 
     while !window.should_close() {
@@ -163,13 +133,9 @@ fn main() {
             // WireFrame
             gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
     
-            gl::UseProgram(program_orange);
-            gl::BindVertexArray(VAO1);
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
-
-            gl::UseProgram(program_white);
-            gl::BindVertexArray(VAO2);
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            gl::UseProgram(program);
+            gl::BindVertexArray(VAO);
+            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
         }
     
         // Swap front and back buffers

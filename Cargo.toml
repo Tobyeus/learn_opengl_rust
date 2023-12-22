@@ -18,3 +18,15 @@ rand = "0.5.5"
 [[example]]
 name = "hello_triangle"
 path = "examples/getting_started/hello_triangle.rs"
+
+[[example]]
+name = "hello_indexed"
+path = "examples/getting_started/hello_indexed.rs"
+
+[[example]]
+name = "exercise_1_1"
+path = "examples/getting_started/exercise1.rs"
+
+[[example]]
+name = "exercise_1_2"
+path = "examples/getting_started/exercise2.rs"

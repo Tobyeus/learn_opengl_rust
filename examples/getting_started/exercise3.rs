@@ -7,6 +7,14 @@ use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 
 use gl::types::*;
 
+//
+// Exercise:
+// Create two shader programs where the second program uses a different fragment shader that outputs the color yellow; draw both triangles again where one outputs the color yellow.
+// https://learnopengl.com/Getting-started/Hello-Triangle
+// My solution will draw an orange and a white triangle
+//
+
+
 // Constants
 const WINDOW_WIDTH: u32 = 800;
 const WINDOW_HEIGHT:u32 = 600;
