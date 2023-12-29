@@ -1,40 +1,17 @@
+mod shader;
+
 extern crate glfw;
 extern crate gl;
 
-use std::{ffi::{CString, c_void}, ptr, mem};
-
+use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
-
 use gl::types::*;
+use shader::Shader;
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
 const WINDOW_HEIGHT:u32 = 600;
 
-const vertexShaderSource: &str = r#"
-    #version 330 core
-
-    layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec3 aColor;
-    
-    out vec3 ourColor;
-
-    void main() {
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-       ourColor = aColor;
-    }
-"#;
-
-const fragmentShaderSource: &str = r#"
-    #version 330 core
-
-    in vec3 ourColor;
-    out vec4 FragColor;
-
-    void main() {
-       FragColor = vec4(ourColor, 1.0);
-    }
-"#;
 
 fn main() {
 
@@ -46,47 +23,9 @@ fn main() {
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let (program, VAO) = unsafe {
+    let shader_pair = Shader::new("./src/shaders/shader.vs", "./src/shaders/shader.fs");
 
-        // vertex shader
-        let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
-        let c_str_vert = CString::new(vertexShaderSource.as_bytes()).unwrap();
-        // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(vertex_shader, 1, &c_str_vert.as_ptr(), ptr::null());
-        gl::CompileShader(vertex_shader);
-
-        let mut success = 0;
-        let mut infoLog = Vec::with_capacity(512);
-        infoLog.set_len(512 - 1);
-        gl::GetShaderiv(vertex_shader, gl::COMPILE_STATUS, &mut success);
-        if success != gl::TRUE as GLint {
-            gl::GetShaderInfoLog(vertex_shader, 512, ptr::null_mut(), infoLog.as_mut_ptr() as *mut GLchar);
-        }
-
-        // fragment shader
-        let fragment_shader = gl::CreateShader(gl::FRAGMENT_SHADER);
-        let c_str_frag = CString::new(fragmentShaderSource.as_bytes()).unwrap();
-        // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(fragment_shader, 1, &c_str_frag.as_ptr(), ptr::null());
-        gl::CompileShader(fragment_shader);
-
-        gl::GetShaderiv(fragment_shader, gl::COMPILE_STATUS, &mut success);
-        if success != gl::TRUE as GLint {
-            gl::GetShaderInfoLog(fragment_shader, 512, ptr::null_mut(), infoLog.as_mut_ptr() as *mut GLchar);
-        }
-
-
-
-        // shader program
-        let shader_program = gl::CreateProgram();
-        // link shaders
-        gl::AttachShader(shader_program, vertex_shader);
-        gl::AttachShader(shader_program, fragment_shader);
-        gl::LinkProgram(shader_program);
-
-        // clean up, delete shaders
-        gl::DeleteShader(vertex_shader);
-        gl::DeleteShader(fragment_shader);
+    let VAO = unsafe {
 
         let vertices_color:[f32; 18] = [
             // x    y    z      // color(rgb)
@@ -125,7 +64,7 @@ fn main() {
         // unbind VAO
         gl::BindVertexArray(0);
 
-        (shader_program, VAO)
+        VAO
     };
 
     while !window.should_close() {
@@ -134,7 +73,7 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
     
-            gl::UseProgram(program);
+            shader_pair.activate();
             gl::BindVertexArray(VAO);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }

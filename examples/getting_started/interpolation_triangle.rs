@@ -1,10 +1,10 @@
+#![allow(dead_code, non_snake_case, non_upper_case_globals)]
+
 extern crate glfw;
 extern crate gl;
 
 use std::{ffi::{CString, c_void}, ptr, mem};
-
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
-
 use gl::types::*;
 
 // Constants

@@ -1,10 +1,10 @@
+#![allow(dead_code, non_snake_case, non_upper_case_globals)]
+
 extern crate glfw;
 extern crate gl;
 
 use std::{ffi::{CString, c_void}, ptr, mem};
-
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
-
 use gl::types::*;
 
 //
@@ -85,10 +85,6 @@ fn main() {
              0.0,  0.5, 0.0,
              0.0, -0.5, 0.0,
              0.5, -0.5, 0.0
-        ];
-
-        let indices = [
-            0, 1, 2
         ];
 
         // initialize vbo and vao

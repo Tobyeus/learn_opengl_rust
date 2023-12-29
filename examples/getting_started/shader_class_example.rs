@@ -1,38 +1,19 @@
-#![allow(dead_code, non_snake_case, non_upper_case_globals)]
+#![allow(dead_code, non_snake_case)]
 
 extern crate glfw;
 extern crate gl;
 
-use std::{ffi::{CString, c_void}, ptr, mem};
+use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 use gl::types::*;
 
+use learn_opengl_rust::shader::Shader;
+
 // Constants
 const WINDOW_WIDTH: u32 = 800;
-const WINDOW_HEIGHT:u32 = 600;
-
-const vertexShaderSource: &str = r#"
-    #version 330 core
-
-    layout (location = 0) in vec3 aPos;
-
-    void main() {
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    }
-"#;
-
-const fragmentShaderSource: &str = r#"
-    #version 330 core
-
-    out vec4 FragColor;
-
-    void main() {
-       FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-    }
-"#;
+const WINDOW_HEIGHT: u32 = 600;
 
 fn main() {
-
     let mut glfw = initialize_glfw();
 
     let (mut window, events) = create_window(&mut glfw);
@@ -41,46 +22,17 @@ fn main() {
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let (program, VAO) = unsafe {
+    let shader_pair = Shader::new("./src/shaders/shader.vs", "./src/shaders/shader.fs");
 
-        // vertex shader
-        let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
-        let c_str_vert = CString::new(vertexShaderSource.as_bytes()).unwrap();
-        // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(vertex_shader, 1, &c_str_vert.as_ptr(), ptr::null());
-        gl::CompileShader(vertex_shader);
+    let VAO = unsafe {
 
-        // fragment shader
-        let fragment_shader = gl::CreateShader(gl::FRAGMENT_SHADER);
-        let c_str_frag = CString::new(fragmentShaderSource.as_bytes()).unwrap();
-        // arguments: shader object, number of strings, source of the shader
-        gl::ShaderSource(fragment_shader, 1, &c_str_frag.as_ptr(), ptr::null());
-        gl::CompileShader(fragment_shader);
-
-        // shader program
-        let shader_program = gl::CreateProgram();
-        // link shaders
-        gl::AttachShader(shader_program, vertex_shader);
-        gl::AttachShader(shader_program, fragment_shader);
-        gl::LinkProgram(shader_program);
-
-        // clean up, delete shaders
-        gl::DeleteShader(vertex_shader);
-        gl::DeleteShader(fragment_shader);
-
-        // vertices for a triangle
-        let vertices: [f32; 9] = [
-            // x    y    z
-            -0.5, -0.5, 0.0, // left
-             0.5, -0.5, 0.0, // right
-             0.0,  0.5, 0.0  // top
+        let vertices_color:[f32; 18] = [
+            // x    y    z      // color(rgb)
+            -0.5, -0.5, 0.0,    1.0, 0.0, 0.0,
+             0.5, -0.5, 0.0,    0.0, 1.0, 0.0,
+             0.0,  0.5, 0.0,    0.0, 0.0, 1.0
         ];
 
-        // initialize vbo and vao
-        // VBO - vertex buffer object
-        // this buffer holds the data(vertices), and will be copied to the graphics card
-        // VAO - vertex array object
-        // object, holds how the data should be used
         let (mut VBO, mut VAO) = (0,0);
 
         // set openGL object for VBO and VAO
@@ -89,15 +41,21 @@ fn main() {
         // bind buffer will set the buffer as the current OpenGl State
         // then storing the data inside this buffer
         gl::BindBuffer(gl::ARRAY_BUFFER, VBO);
-        gl::BufferData(gl::ARRAY_BUFFER, (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &vertices[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
+        gl::BufferData(gl::ARRAY_BUFFER, (vertices_color.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, &vertices_color[0] as *const f32 as *const c_void, gl::STATIC_DRAW);
 
         // bind and configurate VAO
         gl::GenVertexArrays(1, &mut VAO);
         gl::BindVertexArray(VAO);
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
 
-        // we use only 1 VAO so the index of the location is 0
+        let stride = 6 * mem::size_of::<GLfloat>() as GLsizei;
+
+        // configure position attribute aPos
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         gl::EnableVertexAttribArray(0);
+
+        // configure color attribute aColor
+        gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<GLfloat>()) as *const c_void);
+        gl::EnableVertexAttribArray(1);
         
         // clean up? I think this is not mandatory
         // unbind VBO
@@ -105,7 +63,7 @@ fn main() {
         // unbind VAO
         gl::BindVertexArray(0);
 
-        (shader_program, VAO)
+        VAO
     };
 
     while !window.should_close() {
@@ -114,7 +72,7 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
     
-            gl::UseProgram(program);
+            shader_pair.activate();
             gl::BindVertexArray(VAO);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }

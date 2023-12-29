@@ -16,5 +16,10 @@ Make sure to use ```cargo build``` before running anything. The examples can be 
 1. Getting started:
 - hello_triangle
 - hello_indexed
+- Exercise_1_1
+- Exercise_1_2
+- Exercise_1_3
+- interpolation
+- shaderclass
 
 The List will grow gradually over time.
