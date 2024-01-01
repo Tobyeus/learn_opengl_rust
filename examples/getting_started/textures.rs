@@ -1,4 +1,4 @@
-mod shader;
+#![allow(dead_code, non_snake_case)]
 
 extern crate glfw;
 extern crate gl;
@@ -6,8 +6,8 @@ extern crate gl;
 use std::{ffi::c_void, ptr, mem, path::Path};
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 use gl::types::*;
-use shader::Shader;
 use image::*;
+use learn_opengl_rust::shader::Shader;
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
@@ -26,9 +26,9 @@ fn main() {
 
     let shaders = Shader::new(
         "./src/shaders/tex_shader.vs", 
-        "./src/shaders/multiple_tex.fs");
+        "./src/shaders/tex_shader.fs");
 
-    let (VAO, texture1, texture2) = unsafe {
+    let (VAO, texture) = unsafe {
 
         let vertices_rectangle: [f32; 32] = [
             // positions          // colors           // texture coords
@@ -82,59 +82,27 @@ fn main() {
         gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, stride, (6 * mem::size_of::<GLfloat>()) as *const c_void);
         gl::EnableVertexAttribArray(2);
 
-        // initialize textures as u32
-        let (mut texture1, mut texture2): (u32, u32) = (0, 0);
-        // generate textures in ogl
-        gl::GenTextures(1, &mut texture1);
-        // bind texture
-        gl::BindTexture(gl::TEXTURE_2D, texture1);
+        let mut texture: u32 = 0;
+        gl::GenTextures(1, &mut texture);
+        gl::BindTexture(gl::TEXTURE_2D, texture);
 
-        // settings for texture wrapping 
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-        // settuings for texture filtering
+
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-        // more info https://learnopengl.com/Getting-started/Textures
 
-        // store image, flip vertically
-        let texture_image = image::open(&Path::new("resources/container.jpg")).expect("Could not open the file").flipv();
-        // set data as raw_pixels
+        let texture_image = image::open(&Path::new("resources/container.jpg")).expect("Could not open the file");
         let data = texture_image.raw_pixels();
 
-        // configure texture
-        gl::TexImage2D(gl::TEXTURE_2D, 
+        gl::TexImage2D(
+            gl::TEXTURE_2D, 
             0, 
             gl::RGB as i32, 
             texture_image.width() as i32, 
             texture_image.height() as i32,
             0,
             gl::RGB,
-            gl::UNSIGNED_BYTE,
-            &data[0] as *const u8 as *const c_void
-        );
-        // generate Mipmap
-        gl::GenerateMipmap(gl::TEXTURE_2D);
-
-        let texture_image = image::open("resources/awesomeface.png").expect("Could not open file").flipv();
-        let data = texture_image.raw_pixels();
-
-        gl::GenTextures(1, &mut texture2);
-        gl::BindTexture(gl::TEXTURE_2D, texture2);
-
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-
-        gl::TexImage2D(gl::TEXTURE_2D, 
-            0, 
-            gl::RGBA as i32, 
-            texture_image.width() as i32, 
-            texture_image.height() as i32,
-            0,
-            gl::RGBA,
             gl::UNSIGNED_BYTE,
             &data[0] as *const u8 as *const c_void
         );
@@ -146,14 +114,7 @@ fn main() {
         // unbind VAO
         gl::BindVertexArray(0);
 
-        // make sure to use the program befor setting uniforms
-        shaders.use_program();
-
-        // set uniforms for textures
-        shaders.set_int("texture1", 0);
-        shaders.set_int("texture2", 1);
-
-        (VAO, texture1, texture2)
+        (VAO, texture)
     };
 
     while !window.should_close() {
@@ -162,11 +123,7 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
     
-            // set active texture group and bind the texture
-            gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, texture1);
-            gl::ActiveTexture(gl::TEXTURE1);
-            gl::BindTexture(gl::TEXTURE_2D, texture2);
+            gl::BindTexture(gl::TEXTURE_2D, texture);
 
             shaders.use_program();
             gl::BindVertexArray(VAO);

@@ -41,4 +41,12 @@ path = "examples/getting_started/interpolation_triangle.rs"
 
 [[example]]
 name = "shaderclass"
-path = "examples/getting_started/shader_class_example.rs"
+path = "examples/getting_started/shader_class.rs"
+
+[[example]]
+name = "textures"
+path = "examples/getting_started/textures.rs"
+
+[[example]]
+name = "multiple_textures"
+path = "examples/getting_started/multi_tex.rs"

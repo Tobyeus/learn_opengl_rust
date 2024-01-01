@@ -1,13 +1,12 @@
-mod shader;
-
 extern crate glfw;
 extern crate gl;
 
 use std::{ffi::c_void, ptr, mem, path::Path};
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 use gl::types::*;
-use shader::Shader;
+use learn_opengl_rust::shader::Shader;
 use image::*;
+
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;

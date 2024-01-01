@@ -72,7 +72,7 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
     
-            shader_pair.activate();
+            shader_pair.use_program();
             gl::BindVertexArray(VAO);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }
