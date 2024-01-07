@@ -22,7 +22,7 @@ fn main() {
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let shader_pair = Shader::new("./src/shaders/shader.vs", "./src/shaders/shader.fs");
+    let shader_pair = Shader::new("./src/shaders/getting_started/shader.vs", "./src/shaders/getting_started/shader.fs");
 
     let VAO = unsafe {
 

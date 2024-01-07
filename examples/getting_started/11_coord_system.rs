@@ -1,12 +1,12 @@
 extern crate glfw;
 extern crate gl;
 
-use std::{ffi::c_void, ptr, mem, path::Path};
+use std::{ffi::{c_void, CString}, ptr, mem, path::Path};
 use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 use gl::types::*;
 use learn_opengl_rust::shader::Shader;
-use image::*;
-
+use image::{DynamicImage, GenericImage};
+use cgmath::{Matrix4, Vector4, BaseFloat, SquareMatrix, Vector3, Matrix, Rad, perspective, Deg};
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
@@ -24,22 +24,67 @@ fn main() {
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
     let shaders = Shader::new(
-        "./src/shaders/tex_shader.vs", 
-        "./src/shaders/multiple_tex.fs");
+        "./src/shaders/getting_started/coord_systems.vs", 
+        "./src/shaders/getting_started/multiple_tex.fs");
 
     let (VAO, texture1, texture2) = unsafe {
 
-        let vertices_rectangle: [f32; 32] = [
-            // positions          // colors           // texture coords
-             0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   1.0, 1.0,   // top right
-             0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   1.0, 0.0,   // bottom right
-            -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   0.0, 0.0,   // bottom left
-            -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0    // top left 
+        let vertices_rectangle: [f32; 20] = [
+            // positions       // texture coords
+             0.5,  0.5, 0.0,   1.0, 1.0,   // top right
+             0.5, -0.5, 0.0,   1.0, 0.0,   // bottom right
+            -0.5, -0.5, 0.0,   0.0, 0.0,   // bottom left
+            -0.5,  0.5, 0.0,   0.0, 1.0    // top left 
         ];
 
         let indices = [
             0, 1, 2,
             2, 3, 0
+        ];
+
+        // Vertices for a cube
+        let vertices_3D: [f32; 180] = [
+            -0.5, -0.5, -0.5,  0.0, 0.0,
+             0.5, -0.5, -0.5,  1.0, 0.0,
+             0.5,  0.5, -0.5,  1.0, 1.0,
+             0.5,  0.5, -0.5,  1.0, 1.0,
+            -0.5,  0.5, -0.5,  0.0, 1.0,
+            -0.5, -0.5, -0.5,  0.0, 0.0,
+        
+            -0.5, -0.5,  0.5,  0.0, 0.0,
+             0.5, -0.5,  0.5,  1.0, 0.0,
+             0.5,  0.5,  0.5,  1.0, 1.0,
+             0.5,  0.5,  0.5,  1.0, 1.0,
+            -0.5,  0.5,  0.5,  0.0, 1.0,
+            -0.5, -0.5,  0.5,  0.0, 0.0,
+        
+            -0.5,  0.5,  0.5,  1.0, 0.0,
+            -0.5,  0.5, -0.5,  1.0, 1.0,
+            -0.5, -0.5, -0.5,  0.0, 1.0,
+            -0.5, -0.5, -0.5,  0.0, 1.0,
+            -0.5, -0.5,  0.5,  0.0, 0.0,
+            -0.5,  0.5,  0.5,  1.0, 0.0,
+        
+             0.5,  0.5,  0.5,  1.0, 0.0,
+             0.5,  0.5, -0.5,  1.0, 1.0,
+             0.5, -0.5, -0.5,  0.0, 1.0,
+             0.5, -0.5, -0.5,  0.0, 1.0,
+             0.5, -0.5,  0.5,  0.0, 0.0,
+             0.5,  0.5,  0.5,  1.0, 0.0,
+        
+            -0.5, -0.5, -0.5,  0.0, 1.0,
+             0.5, -0.5, -0.5,  1.0, 1.0,
+             0.5, -0.5,  0.5,  1.0, 0.0,
+             0.5, -0.5,  0.5,  1.0, 0.0,
+            -0.5, -0.5,  0.5,  0.0, 0.0,
+            -0.5, -0.5, -0.5,  0.0, 1.0,
+        
+            -0.5,  0.5, -0.5,  0.0, 1.0,
+             0.5,  0.5, -0.5,  1.0, 1.0,
+             0.5,  0.5,  0.5,  1.0, 0.0,
+             0.5,  0.5,  0.5,  1.0, 0.0,
+            -0.5,  0.5,  0.5,  0.0, 0.0,
+            -0.5,  0.5, -0.5,  0.0, 1.0
         ];
 
         let (mut VBO, mut VAO, mut EBO) = (0,0,0);
@@ -68,18 +113,14 @@ fn main() {
             gl::STATIC_DRAW
         );
 
-        let stride = 8 * mem::size_of::<GLfloat>() as GLsizei;
+        let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
 
         // configure position attribute aPos
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         gl::EnableVertexAttribArray(0);
 
-        // configure color attribute aColor
-        gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<GLfloat>()) as *const c_void);
+        gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<GLfloat>()) as *const c_void);
         gl::EnableVertexAttribArray(1);
-
-        gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, stride, (6 * mem::size_of::<GLfloat>()) as *const c_void);
-        gl::EnableVertexAttribArray(2);
 
         // initialize textures as u32
         let (mut texture1, mut texture2): (u32, u32) = (0, 0);
@@ -155,12 +196,35 @@ fn main() {
         (VAO, texture1, texture2)
     };
 
+    let model = Matrix4::<f32>::from_angle_x(Deg(-55.0));
+    let view = Matrix4::<f32>::from_translation(Vector3::new(0.0, 0.0, -3.0));
+    let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
+
+    // checking matrices
+    println!("Model Matrix: {:?}", model);
+    println!("View Matrix: {:?}", view);
+    println!("Projection Matrix: {:?}", projection);
+
+    // setting up uniforms
+    unsafe {
+        shaders.use_program();
+
+        let model_mat_location = gl::GetUniformLocation(shaders.program, CString::new("model").unwrap().as_ptr());
+        gl::UniformMatrix4fv(model_mat_location, 1, gl::FALSE, model.as_ptr());
+
+        let view_mat_location = gl::GetUniformLocation(shaders.program, CString::new("view").unwrap().as_ptr());
+        gl::UniformMatrix4fv(view_mat_location, 1, gl::FALSE, view.as_ptr());
+
+        let proj_mat_location = gl::GetUniformLocation(shaders.program, CString::new("projection").unwrap().as_ptr());
+        gl::UniformMatrix4fv(proj_mat_location, 1, gl::FALSE, projection.as_ptr());
+    }
+
     while !window.should_close() {
         // render stuff here
         unsafe {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-    
+
             // set active texture group and bind the texture
             gl::ActiveTexture(gl::TEXTURE0);
             gl::BindTexture(gl::TEXTURE_2D, texture1);

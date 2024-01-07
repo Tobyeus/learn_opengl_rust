@@ -1,9 +1,13 @@
 use std::{fs::{self, File}, ffi::CString, ptr};
+use cgmath::{Matrix4, Matrix};
 use gl::types::{GLint, GLchar};
 
+#[allow(temporary_cstring_as_ptr)]
 pub struct Shader {
     pub program: u32
 }
+
+const SHADER_BASE_DIR: &str = "./src/shaders/";
 
 impl Shader {
     pub fn new(path_vs: &str, path_fs: &str) -> Self {
@@ -34,8 +38,8 @@ impl Shader {
         unsafe {
             // infoLog setup
             let mut success = 0;
-            let mut infoLog = Vec::with_capacity(512);
-            infoLog.set_len(512 - 1);
+            let mut info_log = Vec::with_capacity(512);
+            info_log.set_len(512 - 1);
 
             // vertex shader
             let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
@@ -45,7 +49,7 @@ impl Shader {
             // check vertex shader
             gl::GetShaderiv(vertex_shader, gl::COMPILE_STATUS, &mut success);
             if success != gl::TRUE as GLint {
-                gl::GetShaderInfoLog(vertex_shader, 512, ptr::null_mut(), infoLog.as_mut_ptr() as *mut GLchar);
+                gl::GetShaderInfoLog(vertex_shader, 512, ptr::null_mut(), info_log.as_mut_ptr() as *mut GLchar);
             }
 
             // fragment shader
@@ -56,7 +60,7 @@ impl Shader {
             // check fragment shader
             gl::GetShaderiv(fragment_shader, gl::COMPILE_STATUS, &mut success);
                 if success != gl::TRUE as GLint {
-            gl::GetShaderInfoLog(fragment_shader, 512, ptr::null_mut(), infoLog.as_mut_ptr() as *mut GLchar);
+            gl::GetShaderInfoLog(fragment_shader, 512, ptr::null_mut(), info_log.as_mut_ptr() as *mut GLchar);
             }
 
             // combine shaders with program
@@ -96,4 +100,7 @@ impl Shader {
         unsafe { gl::Uniform3f(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), vector[0], vector[1], vector[2]) }
     }
 
+    pub fn set_mat4(&self,  name: &str, matrix: Matrix4<f32>) {
+        unsafe { gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), 1, gl::FALSE, matrix.as_ptr()); }
+    }
 }

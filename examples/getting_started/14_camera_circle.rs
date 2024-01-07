@@ -1,46 +1,36 @@
 extern crate glfw;
 extern crate gl;
 
-mod shader;
-mod camera;
-
 use std::{ffi::{c_void, CString}, ptr, mem, path::Path};
-use glfw::{Action, Context, Key, GlfwReceiver};
+use glfw::{Action, Context, Key, PWindow, GlfwReceiver};
 use gl::types::*;
-use shader::Shader;
-use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, Matrix, perspective, Deg, InnerSpace, Point3, Vector2};
-use camera::{Camera, CameraMovement};
+use learn_opengl_rust::shader::Shader;
+use image::GenericImage;
+use cgmath::{Matrix4, Vector3, Matrix, perspective, Deg, InnerSpace, Point3, Transform};
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
-const WINDOW_HEIGHT: u32 = 600;
+const WINDOW_HEIGHT:u32 = 600;
+
 
 fn main() {
-    // init
-    let mut glfw = initialize_glfw();
-    let (mut window, events) = create_window(&mut glfw);
 
-    // init camera
-    let mut camera = Camera::new(
-        Point3::new(0.0, 0.0, 3.0),
-        Vector3::new(0.0, 0.0, -1.0),
-        Vector3::new(0.0, 1.0, 0.0),
-        Vector2::new((WINDOW_WIDTH/2) as f32, (WINDOW_HEIGHT/2) as f32),
-    );
+    let mut glfw = initialize_glfw();
+
+    let (mut window, events) = create_window(&mut glfw);
 
     // gl: load all OpenGL function pointers
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let shader = Shader::new(
+    let shaders = Shader::new(
         "./src/shaders/getting_started/coord_systems.vs", 
-        "./src/shaders/getting_started/multiple_tex.fs"
-    );
+        "./src/shaders/getting_started/multiple_tex.fs");
 
     let (VAO, texture1, texture2) = unsafe {
 
         // Vertices for a 3d cube
+        // coords -> x,y,z | texcoords -> x, y
         let vertices_3D: [f32; 180] = [
             -0.5, -0.5, -0.5,  0.0, 0.0,
              0.5, -0.5, -0.5,  1.0, 0.0,
@@ -112,9 +102,63 @@ fn main() {
         gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<GLfloat>()) as *const c_void);
         gl::EnableVertexAttribArray(1);
 
-        // textures
-        let texture1 = load_texture("resources/container.jpg");
-        let texture2 = load_texture("resources/awesomeface.png");
+        // initialize textures as u32
+        let (mut texture1, mut texture2): (u32, u32) = (0, 0);
+        // generate textures in ogl
+        gl::GenTextures(1, &mut texture1);
+        // bind texture
+        gl::BindTexture(gl::TEXTURE_2D, texture1);
+
+        // settings for texture wrapping 
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+        // settuings for texture filtering
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+        // more info here: https://learnopengl.com/Getting-started/Textures
+
+        // store image, flip vertically
+        let texture_image = image::open(&Path::new("resources/container.jpg")).expect("Could not open the file").flipv();
+        // set data as raw_pixels
+        let data = texture_image.raw_pixels();
+
+        // configure texture
+        gl::TexImage2D(gl::TEXTURE_2D, 
+            0, 
+            gl::RGB as i32, 
+            texture_image.width() as i32, 
+            texture_image.height() as i32,
+            0,
+            gl::RGB,
+            gl::UNSIGNED_BYTE,
+            &data[0] as *const u8 as *const c_void
+        );
+        // generate Mipmap
+        gl::GenerateMipmap(gl::TEXTURE_2D);
+
+        let texture_image = image::open("resources/awesomeface.png").expect("Could not open file").flipv();
+        let data = texture_image.raw_pixels();
+
+        gl::GenTextures(1, &mut texture2);
+        gl::BindTexture(gl::TEXTURE_2D, texture2);
+
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+
+        gl::TexImage2D(gl::TEXTURE_2D, 
+            0, 
+            gl::RGBA as i32, 
+            texture_image.width() as i32, 
+            texture_image.height() as i32,
+            0,
+            gl::RGBA,
+            gl::UNSIGNED_BYTE,
+            &data[0] as *const u8 as *const c_void
+        );
+        gl::GenerateMipmap(gl::TEXTURE_2D);
         
         // clean up? I think this is not mandatory
         // unbind VBO
@@ -123,11 +167,11 @@ fn main() {
         gl::BindVertexArray(0);
 
         // make sure to use the program befor setting uniforms
-        shader.use_program();
+        shaders.use_program();
 
         // set uniforms for textures
-        shader.set_int("texture1", 0);
-        shader.set_int("texture2", 1);
+        shaders.set_int("texture1", 0);
+        shaders.set_int("texture2", 1);
 
         (VAO, texture1, texture2)
     };
@@ -150,34 +194,55 @@ fn main() {
         Vector3::new( -1.3, 1.0, -1.5),
     ];
 
+    // we need 3 axes for our camera: the direction of the camera, the x-axis of the camera and the up axis
+    // direction of the camera is the opposite direction of the target
+    // setting up the camera
+    let camera_pos = Vector3::new(0.0, 0.0, 1.0);
+    let camera_target = Vector3::new(0.0, 0.0, 0.0);
+
+    // camera direction
+    let camera_direction = (camera_pos - camera_target).normalize();
+
+    // camera x axis
+    let up_direction = Vector3::new(0.0, 1.0, 0.0);
+    let camera_x_axis = Vector3::cross(up_direction, camera_direction);
+
+    // camera "up"
+    let camera_up = Vector3::cross(camera_direction, camera_x_axis);
+
+    // lookAt matrix, which will be used as the view matrix
+    let look_at_mat = Matrix4::look_at_dir( Point3::new(0.0, 0.0, 3.0), camera_direction, camera_up);
+
+    println!("Camera direction: {:?}", camera_direction);
+    println!("Camera x-Axis: {:?}", camera_x_axis);
+    println!("Camera up-Axis: {:?}", camera_up);
+
     // setting up uniforms
     unsafe {
-        let proj_mat_location = gl::GetUniformLocation(shader.program, CString::new("projection").unwrap().as_ptr());
+        let proj_mat_location = gl::GetUniformLocation(shaders.program, CString::new("projection").unwrap().as_ptr());
         gl::UniformMatrix4fv(proj_mat_location, 1, gl::FALSE, projection.as_ptr());
 
         gl::Enable(gl::DEPTH_TEST);
     }
 
-    let mut last_frame = 0.0;
-    let mut delta_time: f32;
-
     while !window.should_close() {
-
-        let current_frame = glfw.get_time() as f32;
-
-        delta_time = current_frame - last_frame;
-        last_frame = current_frame;
-
-        // processing events here
-        process_events(&events, &mut camera);
-        process_input_keyboard(&mut window, delta_time, &mut camera);
-
         // render stuff here
         unsafe {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
-            shader.set_mat4("view", camera.calculate_view());
+            let radius: f32 = 10.0;
+
+            let cam_x = glfw.get_time().sin() as f32 * radius;
+            let cam_z = glfw.get_time().cos() as f32 * radius;
+
+            let look_at_mat = Matrix4::look_at( 
+                Point3::new(cam_x, 0.0, cam_z),
+                Point3::new(0.0, 0.0, 0.0),
+                Vector3::new(0.0, 1.0, 0.0));
+
+            let view_mat_location = gl::GetUniformLocation(shaders.program, CString::new("view").unwrap().as_ptr());
+            gl::UniformMatrix4fv(view_mat_location, 1, gl::FALSE, look_at_mat.as_ptr());
 
             // set active texture group and bind the texture
             gl::ActiveTexture(gl::TEXTURE0);
@@ -185,7 +250,7 @@ fn main() {
             gl::ActiveTexture(gl::TEXTURE1);
             gl::BindTexture(gl::TEXTURE_2D, texture2);
 
-            shader.use_program();
+            shaders.use_program();
             gl::BindVertexArray(VAO);
 
             for (index, vector) in cube_positions.iter().enumerate() {
@@ -193,7 +258,7 @@ fn main() {
                 let angle = 20.0 * index as f32;
 
                 let model = Matrix4::<f32>::from_translation(*vector) * Matrix4::<f32>::from_axis_angle(Vector3::new(1.0, 0.3, 0.5).normalize(), Deg(angle));
-                let model_location = gl::GetUniformLocation(shader.program, CString::new("model").unwrap().as_ptr());
+                let model_location = gl::GetUniformLocation(shaders.program, CString::new("model").unwrap().as_ptr());
                 gl::UniformMatrix4fv(model_location, 1, gl::FALSE, model.as_ptr());
 
                 gl::DrawArrays(gl::TRIANGLES, 0, 36);
@@ -202,43 +267,33 @@ fn main() {
     
         // Swap front and back buffers
         window.swap_buffers();
-        glfw.poll_events();
+
+        // processing events here
+        process_events(&mut glfw, &mut window, &events);
     }
 }
 
-fn process_input_keyboard(window: &mut glfw::Window, delta_time: f32, camera: &mut Camera) {
-    // quit application
-    if window.get_key(Key::Escape) == Action::Press {
-        window.set_should_close(true)
-    }
-
-    if window.get_key(Key::W) == Action::Press {
-        camera.process_movement(CameraMovement::Forward, delta_time);
-    }
-    if window.get_key(Key::S) == Action::Press {
-        camera.process_movement(CameraMovement::Backward, delta_time);
-    }
-    if window.get_key(Key::A) == Action::Press {
-        camera.process_movement(CameraMovement::Left, delta_time);
-    }
-    if window.get_key(Key::D) == Action::Press {
-        camera.process_movement(CameraMovement::Right, delta_time);
+fn process_input(window: &mut PWindow, event: glfw::WindowEvent) {
+    match event {
+        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+            window.set_should_close(true)
+        },
+        _ => {},
     }
 }
 
-fn process_events(events: &GlfwReceiver<(f64, glfw::WindowEvent)>, camera: &mut Camera) {
+fn process_events(glfw: &mut glfw::Glfw, window: &mut PWindow, events: &GlfwReceiver<(f64, glfw::WindowEvent)>) {
+    // Poll for and process events
+    glfw.poll_events();
     for (_, event) in glfw::flush_messages(events) {
         println!("{:?}", event);
-        match event {
-            glfw::WindowEvent::CursorPos(x_pos, y_pos) => camera.process_cursor(x_pos as f32, y_pos as f32),
-            _ => ()
-        }
+        process_input(window, event);
     }
 }
 
 fn initialize_glfw() -> glfw::Glfw {
     use glfw::fail_on_errors;
-    let mut glfw: glfw::Glfw = glfw::init(glfw::fail_on_errors!()).expect("Failed to initialize GLFW");
+    let mut glfw = glfw::init(glfw::fail_on_errors!()).expect("Failed to initialize GLFW");
     glfw.window_hint(glfw::WindowHint::ContextVersion(3,3));
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
     glfw
@@ -253,46 +308,5 @@ fn create_window(glfw: &mut glfw::Glfw) -> (glfw::PWindow, glfw::GlfwReceiver<(f
     window.make_current();
     window.set_key_polling(true);
     window.set_framebuffer_size_polling(true);
-    window.set_cursor_pos_polling(true);
-    window.set_scroll_polling(true);
-    window.set_cursor_mode(glfw::CursorMode::Disabled);
     (window, events)
-}
-
-unsafe fn load_texture(path: &str) -> u32 {
-    let mut texture = 0;
-
-    let img = image::open(path).expect("Could not open file").flipv();
-    let format = match img {
-        ImageRgb8(_) => gl::RGB,
-        ImageRgba8(_) => gl::RGBA,
-        _ => panic!("Problem with the format")
-    };
-    let data = img.raw_pixels();
-
-    gl::GenTextures(1, &mut texture);
-    gl::BindTexture(gl::TEXTURE_2D, texture);
-
-    gl::TexImage2D(
-        gl::TEXTURE_2D,
-        0,
-        format as i32,
-        img.width() as i32,
-        img.height() as i32,
-        0,
-        format,
-        gl::UNSIGNED_BYTE,
-        &data[0] as *const u8 as *const c_void
-    );
-
-    gl::GenerateMipmap(gl::TEXTURE_2D);
-
-    //wrapping
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-    //filtering
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-
-    texture
 }
