@@ -52,18 +52,23 @@ impl Camera {
     }
 
     pub fn process_cursor(&mut self, x_new: f32, y_new: f32) {
+        //offset between old and new cursor position
         let mut x_off_set = x_new - self.cursor_pos.x;
         let mut y_off_set = y_new - self.cursor_pos.y;
 
+        //update new position in camera
         self.cursor_pos.x = x_new;
         self.cursor_pos.y = y_new;
 
+        //multiply offset with sensitivity factor
         x_off_set *= CAMERA_SENSE;
         y_off_set *= CAMERA_SENSE;
 
+        //add offset to yaw and pitch
         self.yaw += x_off_set;
         self.pitch -= y_off_set;
 
+        //make sure we don't have gimbal lock
         if self.pitch > 89.0 {
             self.pitch = 89.0;
         }
@@ -71,6 +76,7 @@ impl Camera {
             self.pitch = -89.0;
         }
 
+        //calculate direction vector
         let direction = Vector3::new(
             Rad(self.yaw).cos() * Rad(self.pitch).cos(),
             Rad(self.pitch).sin(),
