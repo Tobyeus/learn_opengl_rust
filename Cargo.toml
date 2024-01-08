@@ -17,60 +17,64 @@ rand = "0.5.5"
 
 [[example]]
 name = "hello_triangle"
-path = "examples/getting_started/1_hello_triangle.rs"
+path = "examples/1_getting_started/1_hello_triangle.rs"
 
 [[example]]
 name = "hello_indexed"
-path = "examples/getting_started/2_hello_indexed.rs"
+path = "examples/1_getting_started/2_hello_indexed.rs"
 
 [[example]]
 name = "exercise_1_1"
-path = "examples/getting_started/3_exercise1.rs"
+path = "examples/1_getting_started/3_exercise1.rs"
 
 [[example]]
 name = "exercise_1_2"
-path = "examples/getting_started/4_exercise2.rs"
+path = "examples/1_getting_started/4_exercise2.rs"
 
 [[example]]
 name = "exercise_1_3"
-path = "examples/getting_started/5_exercise3.rs"
+path = "examples/1_getting_started/5_exercise3.rs"
 
 [[example]]
 name = "interpolation"
-path = "examples/getting_started/6_interpolation_triangle.rs"
+path = "examples/1_getting_started/6_interpolation_triangle.rs"
 
 [[example]]
 name = "shader_class"
-path = "examples/getting_started/7_shader_class.rs"
+path = "examples/1_getting_started/7_shader_class.rs"
 
 [[example]]
 name = "textures"
-path = "examples/getting_started/8_textures.rs"
+path = "examples/1_getting_started/8_textures.rs"
 
 [[example]]
 name = "multiple_textures"
-path = "examples/getting_started/9_multi_tex.rs"
+path = "examples/1_getting_started/9_multi_tex.rs"
 
 [[example]]
 name = "transformations"
-path = "examples/getting_started/10_transformations.rs"
+path = "examples/1_getting_started/10_transformations.rs"
 
 [[example]]
 name = "coordinate_system"
-path = "examples/getting_started/11_coord_system.rs"
+path = "examples/1_getting_started/11_coord_system.rs"
 
 [[example]]
 name = "3D_cube"
-path = "examples/getting_started/12_cube_3d.rs"
+path = "examples/1_getting_started/12_cube_3d.rs"
 
 [[example]]
 name = "cubes"
-path = "examples/getting_started/13_multiple_cubes.rs"
+path = "examples/1_getting_started/13_multiple_cubes.rs"
 
 [[example]]
 name = "camera_circle"
-path = "examples/getting_started/14_camera_circle.rs"
+path = "examples/1_getting_started/14_camera_circle.rs"
 
 [[example]]
 name = "camera_move"
-path = "examples/getting_started/15_camera_movement.rs"
+path = "examples/1_getting_started/15_camera_movement.rs"
+
+[[example]]
+name = "camera_system"
+path = "examples/1_getting_started/16_camera_system.rs"

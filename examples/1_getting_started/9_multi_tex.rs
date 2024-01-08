@@ -24,8 +24,8 @@ fn main() {
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
     let shaders = Shader::new(
-        "./src/shaders/getting_started/tex_shader.vs", 
-        "./src/shaders/getting_started/multiple_tex.fs");
+        "./src/shaders/1_getting_started/tex_shader.vs", 
+        "./src/shaders/1_getting_started/multiple_tex.fs");
 
     let (VAO, texture1, texture2) = unsafe {
 
