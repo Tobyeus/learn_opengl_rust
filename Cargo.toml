@@ -15,6 +15,10 @@ tobj = "0.1.6"
 num = "0.2.0"
 rand = "0.5.5"
 
+## Examples
+
+# Chapter 1
+
 [[example]]
 name = "hello_triangle"
 path = "examples/1_getting_started/1_hello_triangle.rs"
@@ -78,3 +82,9 @@ path = "examples/1_getting_started/15_camera_movement.rs"
 [[example]]
 name = "camera_system"
 path = "examples/1_getting_started/16_camera_system.rs"
+
+# Chapter 2
+
+[[example]]
+name = "colors"
+path = "examples/2_lighting/1_colors.rs"

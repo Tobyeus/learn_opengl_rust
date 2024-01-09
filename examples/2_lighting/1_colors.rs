@@ -1,16 +1,13 @@
 extern crate glfw;
 extern crate gl;
 
-mod shader;
-mod camera;
-
-use std::{ffi::{c_void, CString}, ptr, mem, path::Path};
+use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, GlfwReceiver};
-use gl::{types::*, BindVertexArray};
-use shader::Shader;
+use gl::types::*;
+use learn_opengl_rust::shader::Shader;
 use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, Matrix, perspective, Deg, InnerSpace, Point3, Vector2, SquareMatrix};
-use camera::{Camera, CameraMovement};
+use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, SquareMatrix};
+use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
