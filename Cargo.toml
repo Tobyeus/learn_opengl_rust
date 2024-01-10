@@ -88,3 +88,11 @@ path = "examples/1_getting_started/16_camera_system.rs"
 [[example]]
 name = "colors"
 path = "examples/2_lighting/1_colors.rs"
+
+[[example]]
+name = "phong_split"
+path = "examples/2_lighting/2_ambient_diffuse_specular.rs"
+
+[[example]]
+name = "phong_light"
+path = "examples/2_lighting/3_phong_lighting.rs"

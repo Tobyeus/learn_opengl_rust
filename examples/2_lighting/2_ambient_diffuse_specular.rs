@@ -1,16 +1,13 @@
 extern crate glfw;
 extern crate gl;
 
-mod shader;
-mod camera;
-
-use std::{ffi::{c_void, CString}, ptr, mem, path::Path};
+use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, GlfwReceiver};
 use gl::{types::*};
-use shader::Shader;
+use learn_opengl_rust::shader::Shader;
 use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, Matrix, perspective, Deg, InnerSpace, Point3, Vector2, SquareMatrix};
-use camera::{Camera, CameraMovement};
+use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, SquareMatrix};
+use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
@@ -129,7 +126,7 @@ fn main() {
     
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
 
-    let light_pos = Vector3::new(0.0, 1.5, -1.0);
+    let light_pos = Vector3::new(0.0, 1.5, 2.0);
 
     ambient_shader.use_program();
     ambient_shader.set_mat4("projection", projection);

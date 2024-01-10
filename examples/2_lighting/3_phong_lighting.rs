@@ -1,16 +1,13 @@
 extern crate glfw;
 extern crate gl;
 
-mod shader;
-mod camera;
-
-use std::{ffi::{c_void, CString}, ptr, mem, path::Path};
+use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, GlfwReceiver};
-use gl::{types::*};
-use shader::Shader;
+use gl::types::*;
+use learn_opengl_rust::shader::Shader;
 use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, Matrix, perspective, Deg, InnerSpace, Point3, Vector2, SquareMatrix};
-use camera::{Camera, CameraMovement};
+use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, SquareMatrix};
+use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
@@ -36,22 +33,12 @@ fn main() {
     // enable depth perspective
     unsafe { gl::Enable(gl::DEPTH_TEST); };
 
-    let ambient_shader = Shader::new(
+    let cube_shader = Shader::new(
         "./src/shaders/2_lighting/phong_light.vs", 
-        "./src/shaders/2_lighting/ambient_light.fs"
+        "./src/shaders/2_lighting/phong_light.fs"
     );
 
-    let diffuse_shader = Shader::new(
-        "./src/shaders/2_lighting/phong_light.vs", 
-        "./src/shaders/2_lighting/diffuse_light.fs"
-    );
-
-    let specular_shader = Shader::new(
-        "./src/shaders/2_lighting/phong_light.vs", 
-        "./src/shaders/2_lighting/specular_light.fs"
-    );
-
-    let light_cube_shader = Shader::new(
+    let light_source_shader = Shader::new(
         "./src/shaders/2_lighting/basic_lighting.vs", 
         "./src/shaders/2_lighting/light_source.fs"
     );
@@ -128,36 +115,18 @@ fn main() {
         };
     
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
+    cube_shader.use_program();
+    cube_shader.set_mat4("projection", projection);
 
-    let light_pos = Vector3::new(0.0, 1.5, -1.0);
-
-    ambient_shader.use_program();
-    ambient_shader.set_mat4("projection", projection);
-    ambient_shader.set_vector3("objectColor", 1.0, 0.5, 0.31);
-    ambient_shader.set_vector3("lightColor", 1.0, 1.0, 1.0);
-
-    diffuse_shader.use_program();
-    diffuse_shader.set_mat4("projection", projection);
-    diffuse_shader.set_vector3("objectColor", 1.0, 0.5, 0.31);
-    diffuse_shader.set_vector3("lightColor", 1.0, 1.0, 1.0);
-    diffuse_shader.set_vector3("lightPos", light_pos.x, light_pos.y, light_pos.z);
-
-    specular_shader.use_program();
-    specular_shader.set_mat4("projection", projection);
-    specular_shader.set_vector3("objectColor", 1.0, 0.5, 0.31);
-    specular_shader.set_vector3("lightColor", 1.0, 1.0, 1.0);
-    specular_shader.set_vector3("lightPos", light_pos.x, light_pos.y, light_pos.z);
-
+    let light_pos = Vector3::new(0.7, 1.0, 2.0);
+    // uniforms for objectColor, lightColor and lightPos
+    cube_shader.set_vector3("objectColor", 1.0, 0.5, 0.31);
+    cube_shader.set_vector3("lightColor", 1.0, 1.0, 1.0);
+    cube_shader.set_vector3("lightPos", light_pos.x, light_pos.y, light_pos.z);
     let mut model;
 
     let mut last_frame = 0.0;
     let mut delta_time;
-
-    let cube_positions: [Vector3<f32>; 3] = [
-        Vector3::new(0.0, 0.0, 0.0),
-        Vector3::new(-1.5, 0.0, 0.0),
-        Vector3::new(1.5, 0.0, 0.0)
-    ];
 
     while !window.should_close() {
 
@@ -175,42 +144,20 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
-            gl::BindVertexArray(vao);
-
-            ambient_shader.use_program();
-            model = Matrix4::<f32>::from_translation(*cube_positions.get(1).unwrap());
-            ambient_shader.use_program();
-            ambient_shader.set_mat4("view", camera.calculate_view());
-            ambient_shader.set_mat4("model", model);
-            ambient_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
-            
-            gl::DrawArrays(gl::TRIANGLES, 0, 36);
-
-            diffuse_shader.use_program();
-            // cube at 0,0,0
             model = Matrix4::<f32>::identity();
-            diffuse_shader.use_program();
-            diffuse_shader.set_mat4("view", camera.calculate_view());
-            diffuse_shader.set_mat4("model", model);
-            diffuse_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
-
+            cube_shader.use_program();
+            cube_shader.set_mat4("view", camera.calculate_view());
+            cube_shader.set_mat4("model", model);
+            cube_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
+            
+            gl::BindVertexArray(vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
-            specular_shader.use_program();
-            // cube at 0,0,0
-            model = Matrix4::<f32>::from_translation(*cube_positions.get(2).unwrap());
-            specular_shader.use_program();
-            specular_shader.set_mat4("view", camera.calculate_view());
-            specular_shader.set_mat4("model", model);
-            specular_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
-
-            gl::DrawArrays(gl::TRIANGLES, 0, 36);
-
-            light_cube_shader.use_program();
+            light_source_shader.use_program();
             model = Matrix4::<f32>::from_translation(light_pos) * Matrix4::<f32>::from_scale(0.2);
-            light_cube_shader.set_mat4("projection", projection);
-            light_cube_shader.set_mat4("view", camera.calculate_view());
-            light_cube_shader.set_mat4("model", model);
+            light_source_shader.set_mat4("projection", projection);
+            light_source_shader.set_mat4("view", camera.calculate_view());
+            light_source_shader.set_mat4("model", model);
 
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
         }
