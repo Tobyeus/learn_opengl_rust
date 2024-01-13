@@ -13,6 +13,13 @@ use learn_opengl_rust::camera::{Camera, CameraMovement};
 const WINDOW_WIDTH: u32 = 800;
 const WINDOW_HEIGHT: u32 = 600;
 
+/*
+    Also add something they call an emission map which is a texture that stores emission values per fragment. 
+    Emission values are colors an object may emit as if it contains a light source itself; 
+    this way an object can glow regardless of the light conditions. Emission maps are often what you see
+    when objects in a game glow (like eyes of a robot, or light strips on a container).
+*/
+
 fn main() {
     // init
     let mut glfw = initialize_glfw();
@@ -35,7 +42,7 @@ fn main() {
 
     let cube_shader = Shader::new(
         "./src/shaders/2_lighting/lighting_maps.vs", 
-        "./src/shaders/2_lighting/lighting_maps.fs"
+        "./src/shaders/2_lighting/emission_map.fs"
     );
 
     let light_source_shader = Shader::new(
@@ -46,6 +53,7 @@ fn main() {
     // Vertices for a 3d cube
     let vertex_cube: [f32; 288] = [
         // positions       // normals        // texture coords
+        // vec3            // vec3           // vec2
         -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,  0.0,  0.0,
          0.5, -0.5, -0.5,  0.0,  0.0, -1.0,  1.0,  0.0,
          0.5,  0.5, -0.5,  0.0,  0.0, -1.0,  1.0,  1.0,
@@ -120,24 +128,15 @@ fn main() {
             vao
         };
     
+    let mut model;
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
     cube_shader.use_program();
     cube_shader.set_mat4("projection", projection);
 
+    //light source setup
     let mut light_pos = Vector3::new(2.0, 1.5, 0.0);
-    let mut light_color = Vector3::new(1.0, 1.0, 1.0);
-    
-    // material can be found under http://devernay.free.fr/cours/opengl/materials.html
-    //cube_shader.set_vector3("material.ambient", 1.0, 0.5, 0.31);
-    //cube_shader.set_vector3("material.diffuse", 1.0, 0.5, 0.31);
-    cube_shader.set_vector3("material.specular", 0.5, 0.5, 0.5);
-    cube_shader.set_float("material.shininess", 64.0);
-    
-    cube_shader.set_vector3("light.ambient", 0.2, 0.2, 0.2);
-    cube_shader.set_vector3("light.diffuse", 0.5, 0.5, 0.5);
+    let light_color = Vector3::new(1.0, 1.0, 1.0);
     cube_shader.set_vector3("light.specular", 1.0, 1.0, 1.0);
-
-    let mut model;
 
     let mut last_frame = 0.0;
     let mut delta_time;
@@ -145,14 +144,17 @@ fn main() {
     //texture
     let diffuse_map = load_texture("./resources/container2.png");
     let specular_map = load_texture("./resources/container2_specular.png");
-
+    let emission_map = load_texture("./resources/matrix.jpg");
+    
+    //material
     cube_shader.set_int("material.diffuseTex", 0);
     cube_shader.set_int("material.specularTex", 1);
+    cube_shader.set_int("material.emissionTex", 2);
+    cube_shader.set_float("material.shininess", 64.0);
 
     while !window.should_close() {
 
         let current_frame = glfw.get_time() as f32;
-
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
 
@@ -175,6 +177,16 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
+            //bind diffuse map texture
+            gl::ActiveTexture(gl::TEXTURE0);
+            gl::BindTexture(gl::TEXTURE_2D, diffuse_map);
+            //bind specular map texture
+            gl::ActiveTexture(gl::TEXTURE1);
+            gl::BindTexture(gl::TEXTURE_2D, specular_map);
+            //bind emissionTex
+            gl::ActiveTexture(gl::TEXTURE2);
+            gl::BindTexture(gl::TEXTURE_2D, emission_map);
+
             model = Matrix4::<f32>::identity();
             cube_shader.use_program();
             cube_shader.set_mat4("view", camera.calculate_view());
@@ -183,13 +195,7 @@ fn main() {
             cube_shader.set_vector3("light.position", light_pos.x, light_pos.y, light_pos.z);
             cube_shader.set_vector3("light.diffuse", light_color.x * 0.4, light_color.y * 0.4, light_color.z * 0.4);
             cube_shader.set_vector3("light.ambient", light_color.x * 0.5, light_color.y * 0.5, light_color.z * 0.5);
-            //bind diffuse map texture
-            gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, diffuse_map);
-            //bind specular map texture
-            gl::ActiveTexture(gl::TEXTURE1);
-            gl::BindTexture(gl::TEXTURE_2D, specular_map);
-
+            
             gl::BindVertexArray(vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
 

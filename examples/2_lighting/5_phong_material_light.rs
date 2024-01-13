@@ -5,7 +5,7 @@ use std::{ffi::c_void, ptr, mem};
 use glfw::{Action, Context, Key, GlfwReceiver};
 use gl::types::*;
 use learn_opengl_rust::shader::Shader;
-use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
+use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}, load};
 use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, SquareMatrix};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 
@@ -34,8 +34,8 @@ fn main() {
     unsafe { gl::Enable(gl::DEPTH_TEST); };
 
     let cube_shader = Shader::new(
-        "./src/shaders/2_lighting/lighting_maps.vs", 
-        "./src/shaders/2_lighting/lighting_maps.fs"
+        "./src/shaders/2_lighting/phong_light.vs", 
+        "./src/shaders/2_lighting/material.fs"
     );
 
     let light_source_shader = Shader::new(
@@ -44,49 +44,48 @@ fn main() {
     );
 
     // Vertices for a 3d cube
-    let vertex_cube: [f32; 288] = [
-        // positions       // normals        // texture coords
-        -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,  0.0,  0.0,
-         0.5, -0.5, -0.5,  0.0,  0.0, -1.0,  1.0,  0.0,
-         0.5,  0.5, -0.5,  0.0,  0.0, -1.0,  1.0,  1.0,
-         0.5,  0.5, -0.5,  0.0,  0.0, -1.0,  1.0,  1.0,
-        -0.5,  0.5, -0.5,  0.0,  0.0, -1.0,  0.0,  1.0,
-        -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,  0.0,  0.0,
-
-        -0.5, -0.5,  0.5,  0.0,  0.0,  1.0,  0.0,  0.0,
-         0.5, -0.5,  0.5,  0.0,  0.0,  1.0,  1.0,  0.0,
-         0.5,  0.5,  0.5,  0.0,  0.0,  1.0,  1.0,  1.0,
-         0.5,  0.5,  0.5,  0.0,  0.0,  1.0,  1.0,  1.0,
-        -0.5,  0.5,  0.5,  0.0,  0.0,  1.0,  0.0,  1.0,
-        -0.5, -0.5,  0.5,  0.0,  0.0,  1.0,  0.0,  0.0,
-
-        -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,  1.0,  0.0,
-        -0.5,  0.5, -0.5, -1.0,  0.0,  0.0,  1.0,  1.0,
-        -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,  0.0,  1.0,
-        -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,  0.0,  1.0,
-        -0.5, -0.5,  0.5, -1.0,  0.0,  0.0,  0.0,  0.0,
-        -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,  1.0,  0.0,
-
-         0.5,  0.5,  0.5,  1.0,  0.0,  0.0,  1.0,  0.0,
-         0.5,  0.5, -0.5,  1.0,  0.0,  0.0,  1.0,  1.0,
-         0.5, -0.5, -0.5,  1.0,  0.0,  0.0,  0.0,  1.0,
-         0.5, -0.5, -0.5,  1.0,  0.0,  0.0,  0.0,  1.0,
-         0.5, -0.5,  0.5,  1.0,  0.0,  0.0,  0.0,  0.0,
-         0.5,  0.5,  0.5,  1.0,  0.0,  0.0,  1.0,  0.0,
-
-        -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,  0.0,  1.0,
-         0.5, -0.5, -0.5,  0.0, -1.0,  0.0,  1.0,  1.0,
-         0.5, -0.5,  0.5,  0.0, -1.0,  0.0,  1.0,  0.0,
-         0.5, -0.5,  0.5,  0.0, -1.0,  0.0,  1.0,  0.0,
-        -0.5, -0.5,  0.5,  0.0, -1.0,  0.0,  0.0,  0.0,
-        -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,  0.0,  1.0,
-
-        -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,  0.0,  1.0,
-         0.5,  0.5, -0.5,  0.0,  1.0,  0.0,  1.0,  1.0,
-         0.5,  0.5,  0.5,  0.0,  1.0,  0.0,  1.0,  0.0,
-         0.5,  0.5,  0.5,  0.0,  1.0,  0.0,  1.0,  0.0,
-        -0.5,  0.5,  0.5,  0.0,  1.0,  0.0,  0.0,  0.0,
-        -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,  0.0,  1.0
+    let vertex_cube: [f32; 216] = [
+        -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
+         0.5, -0.5, -0.5,  0.0,  0.0, -1.0, 
+         0.5,  0.5, -0.5,  0.0,  0.0, -1.0, 
+         0.5,  0.5, -0.5,  0.0,  0.0, -1.0, 
+        -0.5,  0.5, -0.5,  0.0,  0.0, -1.0, 
+        -0.5, -0.5, -0.5,  0.0,  0.0, -1.0, 
+    
+        -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+         0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+         0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+         0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+        -0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+    
+        -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
+        -0.5,  0.5, -0.5, -1.0,  0.0,  0.0,
+        -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
+        -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
+        -0.5, -0.5,  0.5, -1.0,  0.0,  0.0,
+        -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
+    
+         0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+         0.5,  0.5, -0.5,  1.0,  0.0,  0.0,
+         0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
+         0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
+         0.5, -0.5,  0.5,  1.0,  0.0,  0.0,
+         0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+    
+        -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+         0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+         0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+         0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+        -0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+        -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+    
+        -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
+         0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
+         0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+         0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+        -0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+        -0.5,  0.5, -0.5,  0.0,  1.0,  0.0
     ];
 
         let vao = unsafe {
@@ -105,54 +104,45 @@ fn main() {
                 gl::STATIC_DRAW
             );
 
-            // stride for vertex data -> 3 vertex coords 3 normals 2 tex coords
-            let stride = 8 * mem::size_of::<GLfloat>() as GLsizei;
-            // vertex coords
+            let stride = 6 * mem::size_of::<GLfloat>() as GLsizei;
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
             gl::EnableVertexAttribArray(0);
-            // normals
+
             gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<GLfloat>()) as *const c_void);
             gl::EnableVertexAttribArray(1);
-            // texture coords
-            gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, stride, (6 * mem::size_of::<GLfloat>()) as *const c_void);
-            gl::EnableVertexAttribArray(2);
 
             vao
         };
     
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
+
+    let mut light_pos = Vector3::new(0.0, 1.5, 0.0);
+    let mut light_color = Vector3::new(1.0, 1.0, 1.0);
+
     cube_shader.use_program();
     cube_shader.set_mat4("projection", projection);
-
-    let mut light_pos = Vector3::new(2.0, 1.5, 0.0);
-    let mut light_color = Vector3::new(1.0, 1.0, 1.0);
     
-    // material can be found under http://devernay.free.fr/cours/opengl/materials.html
-    //cube_shader.set_vector3("material.ambient", 1.0, 0.5, 0.31);
-    //cube_shader.set_vector3("material.diffuse", 1.0, 0.5, 0.31);
+    // init material struct
+    cube_shader.set_vector3("material.ambient", 1.0, 0.5, 0.31);
+    cube_shader.set_vector3("material.diffuse", 1.0, 0.5, 0.31);
     cube_shader.set_vector3("material.specular", 0.5, 0.5, 0.5);
-    cube_shader.set_float("material.shininess", 64.0);
-    
+    cube_shader.set_float("material.shininess", 32.0);
+    // material can be found under http://devernay.free.fr/cours/opengl/materials.html
+
+    // init light struct
     cube_shader.set_vector3("light.ambient", 0.2, 0.2, 0.2);
     cube_shader.set_vector3("light.diffuse", 0.5, 0.5, 0.5);
     cube_shader.set_vector3("light.specular", 1.0, 1.0, 1.0);
-
+    
     let mut model;
-
+    
+    // delta time
     let mut last_frame = 0.0;
     let mut delta_time;
-
-    //texture
-    let diffuse_map = load_texture("./resources/container2.png");
-    let specular_map = load_texture("./resources/container2_specular.png");
-
-    cube_shader.set_int("material.diffuseTex", 0);
-    cube_shader.set_int("material.specularTex", 1);
 
     while !window.should_close() {
 
         let current_frame = glfw.get_time() as f32;
-
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
 
@@ -162,9 +152,9 @@ fn main() {
         light_pos.z = glfw.get_time().sin() as f32 * 2.0;
 
         //changing light color
-        //light_color.x = (glfw.get_time() * 2.0).sin() as f32;
-        //light_color.y = (glfw.get_time() * 0.7).sin() as f32;
-        //light_color.z = (glfw.get_time() * 1.3).sin() as f32;
+        light_color.x = (glfw.get_time() * 2.0).sin() as f32;
+        light_color.y = (glfw.get_time() * 0.7).sin() as f32;
+        light_color.z = (glfw.get_time() * 1.3).sin() as f32;
 
         // processing events here
         process_events(&events, &mut camera);
@@ -179,17 +169,12 @@ fn main() {
             cube_shader.use_program();
             cube_shader.set_mat4("view", camera.calculate_view());
             cube_shader.set_mat4("model", model);
+            cube_shader.set_vector3("lightPos", light_pos.x, light_pos.y, light_pos.z);
             cube_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
             cube_shader.set_vector3("light.position", light_pos.x, light_pos.y, light_pos.z);
-            cube_shader.set_vector3("light.diffuse", light_color.x * 0.4, light_color.y * 0.4, light_color.z * 0.4);
             cube_shader.set_vector3("light.ambient", light_color.x * 0.5, light_color.y * 0.5, light_color.z * 0.5);
-            //bind diffuse map texture
-            gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, diffuse_map);
-            //bind specular map texture
-            gl::ActiveTexture(gl::TEXTURE1);
-            gl::BindTexture(gl::TEXTURE_2D, specular_map);
-
+            cube_shader.set_vector3("light.diffuse", light_color.x * 0.2, light_color.y * 0.2, light_color.z * 0.2);
+            
             gl::BindVertexArray(vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
@@ -272,7 +257,7 @@ fn load_texture(path: &str) -> u32 {
     };
     let data = img.raw_pixels();
 
-    unsafe {
+    unsafe { 
         gl::GenTextures(1, &mut texture);
         gl::BindTexture(gl::TEXTURE_2D, texture);
 

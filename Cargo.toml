@@ -96,3 +96,19 @@ path = "examples/2_lighting/2_ambient_diffuse_specular.rs"
 [[example]]
 name = "phong_light"
 path = "examples/2_lighting/3_phong_lighting.rs"
+
+[[example]]
+name = "phong_exercise_1"
+path = "examples/2_lighting/4_phong_exercise_1.rs"
+
+[[example]]
+name = "phong_material"
+path = "examples/2_lighting/5_phong_material_light.rs"
+
+[[example]]
+name = "lighting_maps"
+path = "examples/2_lighting/6_lighting_maps.rs"
+
+[[example]]
+name = "emission_map"
+path = "examples/2_lighting/7_lighting_maps_exercise_1.rs"
