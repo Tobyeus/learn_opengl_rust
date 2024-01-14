@@ -112,3 +112,19 @@ path = "examples/2_lighting/6_lighting_maps.rs"
 [[example]]
 name = "emission_map"
 path = "examples/2_lighting/7_lighting_maps_exercise_1.rs"
+
+[[example]]
+name = "directional_light"
+path = "examples/2_lighting/8_directional_light.rs"
+
+[[example]]
+name = "point_light"
+path = "examples/2_lighting/9_point_light.rs"
+
+[[example]]
+name = "spot_light"
+path = "examples/2_lighting/10_point_light.rs"
+
+[[example]]
+name = "multiple_lights"
+path = "examples/2_lighting/11_multiple_lights.rs"
