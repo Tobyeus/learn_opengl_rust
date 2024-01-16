@@ -1,5 +1,5 @@
 use std::{fs::{self, File}, ffi::CString, ptr};
-use cgmath::{Matrix4, Matrix};
+use cgmath::{Matrix4, Matrix, Vector3};
 use gl::types::{GLint, GLchar};
 
 #[allow(temporary_cstring_as_ptr)]
@@ -96,8 +96,12 @@ impl Shader {
         unsafe { gl::Uniform1f(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), value); }
     }
 
-    pub fn set_vector3(&self, name: &str, vector: Vec<f32>) {
-        unsafe { gl::Uniform3f(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), vector[0], vector[1], vector[2]) }
+    pub fn set_vector3(&self, name: &str, vector_x: f32, vector_y: f32, vector_z: f32) {
+        unsafe { gl::Uniform3f(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), vector_x, vector_y, vector_z); }
+    }
+
+    pub fn set_vector3v(&self, name: &str, vector: Vector3<f32>) {
+        unsafe { gl::Uniform3f(gl::GetUniformLocation(self.program, CString::new(name).unwrap().as_ptr()), vector.x, vector.y, vector.z); }
     }
 
     pub fn set_mat4(&self,  name: &str, matrix: Matrix4<f32>) {
