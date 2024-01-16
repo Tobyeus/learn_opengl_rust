@@ -123,7 +123,7 @@ path = "examples/2_lighting/9_point_light.rs"
 
 [[example]]
 name = "spot_light"
-path = "examples/2_lighting/10_point_light.rs"
+path = "examples/2_lighting/10_spot_light.rs"
 
 [[example]]
 name = "multiple_lights"
