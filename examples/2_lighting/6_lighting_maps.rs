@@ -6,7 +6,7 @@ use glfw::{Action, Context, Key, GlfwReceiver};
 use gl::types::*;
 use learn_opengl_rust::shader::Shader;
 use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, InnerSpace, Rad, Angle, EuclideanSpace};
+use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, SquareMatrix};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
@@ -33,9 +33,9 @@ fn main() {
     // enable depth perspective
     unsafe { gl::Enable(gl::DEPTH_TEST); };
 
-    let lighting_shader = Shader::new(
+    let cube_shader = Shader::new(
         "./src/shaders/2_lighting/lighting_maps.vs", 
-        "./src/shaders/2_lighting/multiple_lights.fs"
+        "./src/shaders/2_lighting/lighting_maps.fs"
     );
 
     let light_source_shader = Shader::new(
@@ -121,102 +121,27 @@ fn main() {
             vao
         };
     
-    //preparing lighting shader
     let mut model;
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
-    lighting_shader.use_program();
-    lighting_shader.set_mat4("projection", projection);
+    cube_shader.use_program();
+    cube_shader.set_mat4("projection", projection);
 
-    //material
-    lighting_shader.set_int("material.diffuseTex", 0);
-    lighting_shader.set_int("material.specularTex", 1);
-    lighting_shader.set_float("material.shininess", 32.0);
-    
-    //directional light
-    lighting_shader.set_vector3v("dirLight.direction", Vector3::new(-0.2, -1.0, -0.3));
-    lighting_shader.set_vector3v("dirLight.ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("dirLight.diffuse", Vector3::new(0.4, 0.4, 0.4));
-    lighting_shader.set_vector3v("dirLight.specular", Vector3::new(0.5, 0.5, 0.5));
+    //light source setup
+    let mut light_pos = Vector3::new(2.0, 1.5, 0.0);
+    let light_color = Vector3::new(1.0, 1.0, 1.0);
+    cube_shader.set_vector3("light.specular", 1.0, 1.0, 1.0);
 
-    //point light
-    let point_light_positions: [Vector3<f32>; 4] = [
-        Vector3::new( 0.7,  0.2,  2.0),
-        Vector3::new( 2.3, -3.3, -4.0),
-        Vector3::new(-4.0,  2.0, -12.0),
-        Vector3::new( 0.0,  0.0, -3.0)
-    ];
-
-    let constant = 1.0;
-    let linear = 0.09;
-    let quadratic = 0.032;
-
-    lighting_shader.set_vector3v("pointLight[0].position", point_light_positions[0]);
-    lighting_shader.set_vector3v("pointLight[0].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[0].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[0].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[0].constant", constant);
-    lighting_shader.set_float("pointLight[0].linear", linear);
-    lighting_shader.set_float("pointLight[0].quadratic", quadratic);
-
-    lighting_shader.set_vector3v("pointLight[1].position", point_light_positions[1]);
-    lighting_shader.set_vector3v("pointLight[1].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[1].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[1].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[1].constant", constant);
-    lighting_shader.set_float("pointLight[1].linear", linear);
-    lighting_shader.set_float("pointLight[1].quadratic", quadratic);
-
-    lighting_shader.set_vector3v("pointLight[2].position", point_light_positions[2]);
-    lighting_shader.set_vector3v("pointLight[2].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[2].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[2].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[2].constant", constant);
-    lighting_shader.set_float("pointLight[2].linear", linear);
-    lighting_shader.set_float("pointLight[2].quadratic", quadratic);
-
-    lighting_shader.set_vector3v("pointLight[3].position", point_light_positions[3]);
-    lighting_shader.set_vector3v("pointLight[3].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[3].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[3].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[3].constant", constant);
-    lighting_shader.set_float("pointLight[3].linear", linear);
-    lighting_shader.set_float("pointLight[3].quadratic", quadratic);
-
-    //spot light
-    lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(0.0, 0.0, 0.0));
-    lighting_shader.set_vector3v("spotLight.diffuse", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("spotLight.constant", constant);
-    lighting_shader.set_float("spotLight.linear", linear);
-    lighting_shader.set_float("spotLight.quadratic", quadratic);
-    lighting_shader.set_float("spotLight.cutOff", 0.9978);
-    lighting_shader.set_float("spotLight.outerCutOff", 0.953);
-
-    //cube textures
-    let diffuse_map = load_texture("./resources/container2.png");
-    let specular_map = load_texture("./resources/container2_specular.png");
-
-    //cube positions
-    let cube_positions: [Vector3<f32>; 10] = [
-        Vector3::new( 0.0, 0.0, 0.0),
-        Vector3::new( 2.0, 5.0, -15.0),
-        Vector3::new( -1.5, -2.2, -2.5),
-        Vector3::new( -3.8, -2.0, -12.3),
-        Vector3::new( 2.4, -0.4, -3.5),
-        Vector3::new( -1.7, 3.0, -7.5),
-        Vector3::new( 1.3, -2.0, -2.5),
-        Vector3::new( 1.5, 2.0, -2.5),
-        Vector3::new( 1.5, 0.2, -1.5),
-        Vector3::new( -1.3, 1.0, -1.5),
-    ];
-
-    //preparing light source
-    light_source_shader.use_program();
-    light_source_shader.set_mat4("projection", projection);
-    
-    //delta time
     let mut last_frame = 0.0;
     let mut delta_time;
+
+    //texture
+    let diffuse_map = load_texture("./resources/container2.png");
+    let specular_map = load_texture("./resources/container2_specular.png");
+    
+    //material
+    cube_shader.set_int("material.diffuseTex", 0);
+    cube_shader.set_int("material.specularTex", 1);
+    cube_shader.set_float("material.shininess", 64.0);
 
     while !window.should_close() {
 
@@ -225,9 +150,9 @@ fn main() {
         last_frame = current_frame;
 
         //light source position
-        //light_pos.x = glfw.get_time().cos() as f32 * 2.0;
-        //light_pos.y = glfw.get_time().cos() as f32 * 1.5;
-        //light_pos.z = glfw.get_time().sin() as f32 * 2.0;
+        light_pos.x = glfw.get_time().cos() as f32 * 2.0;
+        light_pos.y = glfw.get_time().cos() as f32 * 1.5;
+        light_pos.z = glfw.get_time().sin() as f32 * 2.0;
 
         //changing light color
         //light_color.x = (glfw.get_time() * 2.0).sin() as f32;
@@ -240,10 +165,8 @@ fn main() {
 
         // render stuff here
         unsafe {
-            gl::ClearColor(0.1, 0.1, 0.1, 1.0);
+            gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
-            gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
             //bind diffuse map texture
             gl::ActiveTexture(gl::TEXTURE0);
@@ -251,39 +174,26 @@ fn main() {
             //bind specular map texture
             gl::ActiveTexture(gl::TEXTURE1);
             gl::BindTexture(gl::TEXTURE_2D, specular_map);
-            //bind vao
+
+            model = Matrix4::<f32>::identity();
+            cube_shader.use_program();
+            cube_shader.set_mat4("view", camera.calculate_view());
+            cube_shader.set_mat4("model", model);
+            cube_shader.set_vector3("cameraPos", camera.position.x, camera.position.y, camera.position.z);
+            cube_shader.set_vector3("light.position", light_pos.x, light_pos.y, light_pos.z);
+            cube_shader.set_vector3("light.diffuse", light_color.x * 0.4, light_color.y * 0.4, light_color.z * 0.4);
+            cube_shader.set_vector3("light.ambient", light_color.x * 0.5, light_color.y * 0.5, light_color.z * 0.5);
+            
             gl::BindVertexArray(vao);
+            gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
-            //recalculate stuff
-            let view = camera.calculate_view();
-            let camera_position = camera.position.to_vec();
-
-            //cube using lighting shader
-            lighting_shader.use_program();
-            lighting_shader.set_mat4("view", view);
-            lighting_shader.set_vector3v("cameraPosition", camera_position);
-            //spot light on camera
-            lighting_shader.set_vector3v("spotLight.direction", camera.front);
-            lighting_shader.set_vector3v("spotLight.position", camera_position);
-
-            for (index, vector) in cube_positions.iter().enumerate() {
-                
-                let angle = 20.0 * index as f32;
-
-                model = Matrix4::<f32>::from_translation(*vector) * Matrix4::<f32>::from_axis_angle(Vector3::new(1.0, 0.3, 0.5).normalize(), Deg(angle));
-                lighting_shader.set_mat4("model", model);
-
-                gl::DrawArrays(gl::TRIANGLES, 0, 36);
-            }
-
-            //light source using light_source_shader
             light_source_shader.use_program();
+            model = Matrix4::<f32>::from_translation(light_pos) * Matrix4::<f32>::from_scale(0.2);
+            light_source_shader.set_mat4("projection", projection);
+            light_source_shader.set_mat4("view", camera.calculate_view());
+            light_source_shader.set_mat4("model", model);
 
-            for point_light in point_light_positions.iter().enumerate() {
-                light_source_shader.set_mat4("model", Matrix4::from_translation(*point_light.1) * Matrix4::from_scale(0.02));
-                light_source_shader.set_mat4("view", view);
-                gl::DrawArrays(gl::TRIANGLES, 0, 36);
-            }
+            gl::DrawArrays(gl::TRIANGLES, 0, 36);
         }
     
         // Swap front and back buffers
@@ -332,7 +242,7 @@ fn initialize_glfw() -> glfw::Glfw {
 
 fn create_window(glfw: &mut glfw::Glfw) -> (glfw::PWindow, glfw::GlfwReceiver<(f64, glfw::WindowEvent)>) {
     // Create a windowed mode window and its OpenGL context
-    let (mut window, events) = glfw.create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Learning OpenGL the rust way...", glfw::WindowMode::Windowed)
+    let (mut window, events) = glfw.create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Learning OpenGL the Rust Way...", glfw::WindowMode::Windowed)
         .expect("Failed to create GLFW window.");
 
     // Make the window's context current

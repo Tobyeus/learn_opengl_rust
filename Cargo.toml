@@ -15,6 +15,10 @@ tobj = "0.1.6"
 num = "0.2.0"
 rand = "0.5.5"
 
+## Examples
+
+# Chapter 1
+
 [[example]]
 name = "hello_triangle"
 path = "examples/1_getting_started/1_hello_triangle.rs"
@@ -78,3 +82,49 @@ path = "examples/1_getting_started/15_camera_movement.rs"
 [[example]]
 name = "camera_system"
 path = "examples/1_getting_started/16_camera_system.rs"
+
+# Chapter 2
+
+[[example]]
+name = "colors"
+path = "examples/2_lighting/1_colors.rs"
+
+[[example]]
+name = "phong_split"
+path = "examples/2_lighting/2_ambient_diffuse_specular.rs"
+
+[[example]]
+name = "phong_light"
+path = "examples/2_lighting/3_phong_lighting.rs"
+
+[[example]]
+name = "phong_exercise_1"
+path = "examples/2_lighting/4_phong_exercise_1.rs"
+
+[[example]]
+name = "phong_material"
+path = "examples/2_lighting/5_phong_material_light.rs"
+
+[[example]]
+name = "lighting_maps"
+path = "examples/2_lighting/6_lighting_maps.rs"
+
+[[example]]
+name = "emission_map"
+path = "examples/2_lighting/7_lighting_maps_exercise_1.rs"
+
+[[example]]
+name = "directional_light"
+path = "examples/2_lighting/8_directional_light.rs"
+
+[[example]]
+name = "point_light"
+path = "examples/2_lighting/9_point_light.rs"
+
+[[example]]
+name = "spot_light"
+path = "examples/2_lighting/10_spot_light.rs"
+
+[[example]]
+name = "multiple_lights"
+path = "examples/2_lighting/11_multiple_lights.rs"
