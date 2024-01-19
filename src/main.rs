@@ -146,51 +146,51 @@ fn main() {
         Vector3::new( 0.0,  0.0, -3.0)
     ];
 
-    let constant = 1.0;
-    let linear = 0.09;
-    let quadratic = 0.032;
+    // let constant = 1.0;
+    // let linear = 0.09;
+    // let quadratic = 0.032;
 
-    lighting_shader.set_vector3v("pointLight[0].position", point_light_positions[0]);
-    lighting_shader.set_vector3v("pointLight[0].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[0].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[0].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[0].constant", constant);
-    lighting_shader.set_float("pointLight[0].linear", linear);
-    lighting_shader.set_float("pointLight[0].quadratic", quadratic);
+    // lighting_shader.set_vector3v("pointLight[0].position", point_light_positions[0]);
+    // lighting_shader.set_vector3v("pointLight[0].ambient", Vector3::new(0.05, 0.05, 0.05));
+    // lighting_shader.set_vector3v("pointLight[0].diffuse", Vector3::new(0.8, 0.8, 0.8));
+    // lighting_shader.set_vector3v("pointLight[0].specular", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_float("pointLight[0].constant", constant);
+    // lighting_shader.set_float("pointLight[0].linear", linear);
+    // lighting_shader.set_float("pointLight[0].quadratic", quadratic);
 
-    lighting_shader.set_vector3v("pointLight[1].position", point_light_positions[1]);
-    lighting_shader.set_vector3v("pointLight[1].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[1].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[1].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[1].constant", constant);
-    lighting_shader.set_float("pointLight[1].linear", linear);
-    lighting_shader.set_float("pointLight[1].quadratic", quadratic);
+    // lighting_shader.set_vector3v("pointLight[1].position", point_light_positions[1]);
+    // lighting_shader.set_vector3v("pointLight[1].ambient", Vector3::new(0.05, 0.05, 0.05));
+    // lighting_shader.set_vector3v("pointLight[1].diffuse", Vector3::new(0.8, 0.8, 0.8));
+    // lighting_shader.set_vector3v("pointLight[1].specular", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_float("pointLight[1].constant", constant);
+    // lighting_shader.set_float("pointLight[1].linear", linear);
+    // lighting_shader.set_float("pointLight[1].quadratic", quadratic);
 
-    lighting_shader.set_vector3v("pointLight[2].position", point_light_positions[2]);
-    lighting_shader.set_vector3v("pointLight[2].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[2].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[2].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[2].constant", constant);
-    lighting_shader.set_float("pointLight[2].linear", linear);
-    lighting_shader.set_float("pointLight[2].quadratic", quadratic);
+    // lighting_shader.set_vector3v("pointLight[2].position", point_light_positions[2]);
+    // lighting_shader.set_vector3v("pointLight[2].ambient", Vector3::new(0.05, 0.05, 0.05));
+    // lighting_shader.set_vector3v("pointLight[2].diffuse", Vector3::new(0.8, 0.8, 0.8));
+    // lighting_shader.set_vector3v("pointLight[2].specular", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_float("pointLight[2].constant", constant);
+    // lighting_shader.set_float("pointLight[2].linear", linear);
+    // lighting_shader.set_float("pointLight[2].quadratic", quadratic);
 
-    lighting_shader.set_vector3v("pointLight[3].position", point_light_positions[3]);
-    lighting_shader.set_vector3v("pointLight[3].ambient", Vector3::new(0.05, 0.05, 0.05));
-    lighting_shader.set_vector3v("pointLight[3].diffuse", Vector3::new(0.8, 0.8, 0.8));
-    lighting_shader.set_vector3v("pointLight[3].specular", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("pointLight[3].constant", constant);
-    lighting_shader.set_float("pointLight[3].linear", linear);
-    lighting_shader.set_float("pointLight[3].quadratic", quadratic);
+    // lighting_shader.set_vector3v("pointLight[3].position", point_light_positions[3]);
+    // lighting_shader.set_vector3v("pointLight[3].ambient", Vector3::new(0.05, 0.05, 0.05));
+    // lighting_shader.set_vector3v("pointLight[3].diffuse", Vector3::new(0.8, 0.8, 0.8));
+    // lighting_shader.set_vector3v("pointLight[3].specular", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_float("pointLight[3].constant", constant);
+    // lighting_shader.set_float("pointLight[3].linear", linear);
+    // lighting_shader.set_float("pointLight[3].quadratic", quadratic);
 
-    //spot light
-    lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(0.0, 0.0, 0.0));
-    lighting_shader.set_vector3v("spotLight.diffuse", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(1.0, 1.0, 1.0));
-    lighting_shader.set_float("spotLight.constant", constant);
-    lighting_shader.set_float("spotLight.linear", linear);
-    lighting_shader.set_float("spotLight.quadratic", quadratic);
-    lighting_shader.set_float("spotLight.cutOff", 0.9978);
-    lighting_shader.set_float("spotLight.outerCutOff", 0.953);
+    // //spot light
+    // lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(0.0, 0.0, 0.0));
+    // lighting_shader.set_vector3v("spotLight.diffuse", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_vector3v("spotLight.ambient", Vector3::new(1.0, 1.0, 1.0));
+    // lighting_shader.set_float("spotLight.constant", constant);
+    // lighting_shader.set_float("spotLight.linear", linear);
+    // lighting_shader.set_float("spotLight.quadratic", quadratic);
+    // lighting_shader.set_float("spotLight.cutOff", 0.9978);
+    // lighting_shader.set_float("spotLight.outerCutOff", 0.953);
 
     //cube textures
     let diffuse_map = load_texture("./resources/container2.png");

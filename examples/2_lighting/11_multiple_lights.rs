@@ -6,7 +6,7 @@ use glfw::{Action, Context, Key, GlfwReceiver};
 use gl::types::*;
 use learn_opengl_rust::shader::Shader;
 use image::{GenericImage, DynamicImage::{ImageRgba8, ImageRgb8}};
-use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, InnerSpace, Rad, Angle, EuclideanSpace};
+use cgmath::{Matrix4, Vector3, perspective, Deg, Point3, Vector2, InnerSpace, EuclideanSpace};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
