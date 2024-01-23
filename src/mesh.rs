@@ -4,32 +4,32 @@ use std::ptr;
 
 use cgmath::Vector3;
 use cgmath::Vector2;
-use gl::types::GLfloat;
-use gl::types::GLsizei;
-use gl::types::GLsizeiptr;
+use cgmath::Zero;
 
 use crate::shader::Shader;
 
+#[repr(C)]
 pub struct Vertex {
-    position: Vector3<f32>,
-    normals: Vector3<f32>,
-    tex_coords: Vector2<f32>
+    pub position: Vector3<f32>,
+    pub normals: Vector3<f32>,
+    pub tex_coords: Vector2<f32>
 }
 
-impl Vertex {
-    pub fn new(position: Vector3<f32>, normals: Vector3<f32>, tex_coords: Vector2<f32>) -> Self {
+impl Default for Vertex {
+    fn default() -> Self {
         Vertex {
-            position,
-            normals,
-            tex_coords
+            position: Vector3::zero(),
+            normals: Vector3::zero(),
+            tex_coords: Vector2::zero(),
         }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Texture {
     pub id: u32,
-    pub tex_type: String
+    pub tex_type: String,
+    pub path: String
 }
 
 pub struct Mesh {
@@ -45,55 +45,29 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new(vertices: Vec<Vertex>, indices: Vec<u32>, textures: Vec<Texture>) -> Self {
-        
-        let vbo = 0;
-        let vao = 0;
-        let ebo = 0;
-        
-        Mesh {
+        let mut mesh = Mesh {
             vertices,
             indices,
             textures,
-            vbo,
-            vao,
-            ebo
-        }
-    }
-    
-    pub unsafe fn draw(&self, shader: &Shader) {
-        let diffuse_number = 0;
-        let specular_number = 0;
+            vao: 0, vbo: 0, ebo: 0
+        };
 
-        for (index, texture) in self.textures.iter().enumerate() {
-            gl::ActiveTexture(gl::TEXTURE0 + texture.id as u32);
-            let number: String = match texture.tex_type.as_str() {
-                "texture_diffuse" => (diffuse_number + 1).to_string(),
-                "texture_specular" => (specular_number + 1).to_string(),
-                _ => panic!("Could not handle type of texture")
-            };
-            let material_name = String::from("material.") + &texture.tex_type + &number;
-            shader.set_int(material_name.as_str(), index as i32);
-            gl::BindTexture(gl::TEXTURE_2D, texture.id as u32);
-        }
-
-        //draw mesh
-        gl::BindVertexArray(self.vao);
-        gl::DrawElements(gl::TRIANGLES, self.indices.len() as i32, gl::UNSIGNED_INT, ptr::null());
-        //clean up
-        gl::BindVertexArray(0);
-        gl::ActiveTexture(gl::TEXTURE0);
+        unsafe { mesh.setup_mesh(); }
+        mesh
     }
-    
-    unsafe fn setupMesh(&mut self){
+
+    unsafe fn setup_mesh(&mut self) {
+        // EBO VBO VAO
+        // setups
         gl::GenVertexArrays(1, &mut self.vao);
         gl::GenBuffers(1, &mut self.vbo);
         gl::GenBuffers(1, &mut self.ebo);
-        
+
         gl::BindVertexArray(self.vao);
         gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (self.vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+            (self.vertices.len() * mem::size_of::<Vertex>()) as isize,
             &self.vertices[0] as *const Vertex as *const c_void,
             gl::STATIC_DRAW
         );
@@ -101,21 +75,52 @@ impl Mesh {
         gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ebo);
         gl::BufferData(
             gl::ELEMENT_ARRAY_BUFFER,
-            (self.indices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-            self.indices[0] as *const u8 as *const c_void,
+            (self.indices.len() * mem::size_of::<u32>()) as isize,
+            &self.indices[0] as *const u32 as *const c_void,
             gl::STATIC_DRAW
         );
 
-        // vertex positions
+        let stride = mem::size_of::<Vertex>() as i32;
+
         gl::EnableVertexAttribArray(0);
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (3 * mem::size_of::<GLfloat>()) as GLsizei, ptr::null());
-        // vertex normals
-        gl::EnableVertexAttribArray(1);
-        gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, (3 * mem::size_of::<GLfloat>()) as GLsizei, ptr::null());
-        // vertex tex coords
-        gl::EnableVertexAttribArray(1);
-        gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, (2 * mem::size_of::<GLfloat>()) as GLsizei, ptr::null());
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         
+        gl::EnableVertexAttribArray(1);
+        gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<f32>()) as *const c_void);
+
+        gl::EnableVertexAttribArray(2);
+        gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, stride, (6 * mem::size_of::<f32>()) as *const c_void);
+
         gl::BindVertexArray(0);
+    }
+
+    pub unsafe fn draw(&self, shader: &Shader) {
+
+        //iterate through textures
+        //set uniforms for textures
+        //bind textures
+        //draw call
+        let mut diffuse_index = 0;
+
+        for (i, t) in self.textures.iter().enumerate() {
+            gl::ActiveTexture(gl::TEXTURE0 + i as u32);
+            let name = &t.tex_type;
+            let number = match name.as_str() {
+                "texture_diffuse" => {
+                    diffuse_index += 1;
+                    diffuse_index
+                },
+                _ => panic!("No implemented texture type..")
+            };
+            let uniform_name = format!("{}{}", name, number.to_string());
+            shader.use_program();
+            shader.set_int(&uniform_name, i as i32);
+            gl::BindTexture(gl::TEXTURE_2D, t.id);
+        }
+        gl::BindVertexArray(self.vao);
+        gl::DrawElements(gl::TRIANGLES, self.indices.len() as i32, gl::UNSIGNED_INT, ptr::null());
+
+        gl::BindVertexArray(0);
+        gl::ActiveTexture(gl::TEXTURE0);
     }
 }
