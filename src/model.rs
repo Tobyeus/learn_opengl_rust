@@ -19,7 +19,6 @@ use tobj::Material;
 use crate::mesh;
 use crate::shader;
 
-#[derive(Default)]
 pub struct Model {
     /*  Model Data */
     pub meshes: Vec<Mesh>,
