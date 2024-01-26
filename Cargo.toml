@@ -127,3 +127,13 @@ path = "examples/2_lighting/10_spot_light.rs"
 [[example]]
 name = "multiple_lights"
 path = "examples/2_lighting/11_multiple_lights.rs"
+
+#Chapter3
+
+[[example]]
+name = "backpack"
+path = "examples/3_model_loading/1_model_loading_backpack.rs"
+
+[[example]]
+name = "backpack_lighting"
+path = "examples/3_model_loading/2_backpack_lighting.rs"

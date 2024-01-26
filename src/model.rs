@@ -1,130 +1,143 @@
-use std::ffi::c_void;
-use std::ops::Add;
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+
+use std::default;
+use std::os::raw::c_void;
 use std::path::Path;
 
-use cgmath::{Vector3, Vector2};
-use image::DynamicImage::{ImageRgb8, ImageRgba8};
+use cgmath::{vec2, vec3};
+use gl;
+use image;
+use image::DynamicImage::*;
 use image::GenericImage;
-use tobj::{self, Material};
+use tobj;
 
-use crate::mesh::{Mesh, Vertex, Texture};
-use crate::shader::Shader;
+use mesh::{ Mesh, Texture, Vertex };
+use shader::Shader;
+use tobj::Material;
+
+use crate::mesh;
+use crate::shader;
 
 #[derive(Default)]
 pub struct Model {
-    meshes: Vec<Mesh>,
-    materials: Vec<tobj::Material>,
+    /*  Model Data */
+    pub meshes: Vec<Mesh>,
+    pub textures_loaded: Vec<Texture>,   // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     directory: String,
 }
 
-const DIRECTORY: &str = "./resources/obj/";
-
 impl Model {
-    pub fn new(path: &str) -> Self {
-        let mut model = Model::default();
-        model.directory = path.to_string();
+    pub fn new(path: &str, file: &str) -> Model {
+        let mut model = Model {
+            directory: path.into(),
+            ..Model::default()
+        };
+        model.load_model(file);
         model
     }
-
-    pub fn draw(&self, shader: &Shader) {
+    
+    pub fn Draw(&self, shader: &Shader) {
         for mesh in &self.meshes {
-            unsafe { mesh.draw(shader); }
+            unsafe { mesh.Draw(shader); }
         }
     }
-
-    fn load_model(&mut self, file_name: &str) {
-        let file_path = DIRECTORY.to_string().add(file_name);
-        let object = tobj::load_obj(Path::new(file_path.as_str())).expect("Could not load 3D object");
-        let models = object.0;
-        self.materials = object.1;
-        //self.processModels(models);
-
-        for model in models.iter() {
-            self.meshes.push(self.processMesh(&model.mesh));
+    
+    pub fn load_model(&mut self, file: &str) {
+        let full_dir = &format!("{}/{}", self.directory, file);
+        let path = Path::new(full_dir);
+        let obj = tobj::load_obj(path).expect("Could not open object file");
+        
+        let (models, materials) = obj;
+        for model in models {
+            let mesh = &model.mesh;
+            let num_vertices = mesh.positions.len() / 3;
             
+            // data to fill
+            let mut vertices: Vec<Vertex> = Vec::with_capacity(num_vertices);
+            //extract indices
+            let indices: Vec<u32> = mesh.indices.clone();
+            
+            //extracting positions, normals, texture coordinates
+            let (p, n, t) = (&mesh.positions, &mesh.normals, &mesh.texcoords);
+            for i in 0..num_vertices {
+                vertices.push(Vertex {
+                    position:  vec3(p[i*3], p[i*3+1], p[i*3+2]),
+                    normal:    vec3(n[i*3], n[i*3+1], n[i*3+2]),
+                    tex_coords: vec2(t[i*2], t[i*2+1]),
+                    ..Vertex::default()
+                })
+            }
+            
+            let textures = match mesh.material_id {
+                Some(material_id) => self.process_materials(materials.get(material_id).expect("Could not load material from mesh")),
+                None => Vec::new()
+            };  
+            
+            self.meshes.push(Mesh::new(vertices, indices, textures));
         }
     }
-
-    fn processMesh(&self, mesh: &tobj::Mesh) -> Mesh {
-        let num_vertices = mesh.positions.len()/3;
-        let mut vertices: Vec<Vertex> = Vec::with_capacity(num_vertices);
-        //verticies, normals, texcoords
-        let (p, n, t) = (&mesh.positions, &mesh.normals, &mesh.texcoords);
-        for i in 0..num_vertices {
-            let position = Vector3::new(p[i*3], p[i*3 +1], p[i*3 +2]);
-            let normals = Vector3::new(n[i*3], n[i*3 +1], n[i*3 +2]);
-            let tex_coords = Vector2::new(t[i*2], t[i*2 +1]);
-
-            let vertex = Vertex::new(
-                position,
-                normals,
-                tex_coords
-            );
-            vertices.push(vertex);
-        }
-
-        //indices
-        let indices = mesh.indices.clone();
-
-        //materials
-        let material = self.materials.get(mesh.material_id.unwrap()).unwrap();
+    
+    fn process_materials(&mut self, material: &Material) -> Vec<Texture> {
         let mut textures = Vec::new();
+        // 1. diffuse map
         if !material.diffuse_texture.is_empty() {
-            let diffuse_texture = Texture { id: load_texture(&material.diffuse_texture), tex_type: "texture_diffuse".into()};
-            textures.push(diffuse_texture);
+            let texture = self.load_material_texture(&format!("{}/{}", self.directory, material.diffuse_texture), "texture_diffuse");
+            textures.push(texture);
         }
-
+        // 2. specular map
         if !material.specular_texture.is_empty() {
-            let specular_texture = Texture { id: load_texture(&material.specular_texture), tex_type: "texture_specular".into()};
-            textures.push(specular_texture);
+            let texture = self.load_material_texture(&format!("{}/{}", self.directory, material.diffuse_texture), "texture_specular");
+            textures.push(texture);
         }
-
-        //not yet implemented in mesh
+        // 3. normal map
         if !material.normal_texture.is_empty() {
-            let normal_texture = Texture { id: load_texture(&material.specular_texture), tex_type: "texture_normal".into()};
+            let texture = self.load_material_texture(&format!("{}/{}", self.directory, material.diffuse_texture), "texture_normal");
+            textures.push(texture);
         }
-
-        Mesh::new(vertices, indices, textures)
+        textures
     }
-
+    
+    fn load_material_texture(&mut self, path: &str, typeName: &str) -> Texture {
+        let texture = self.textures_loaded.iter().find(|t| t.path == path);
+        if let Some(texture) = texture {
+            return texture.clone();
+        }
+        let texture = Texture {
+            id: unsafe { TextureFromFile(path) },
+            type_: typeName.into(),
+            path: path.into()
+        };
+        self.textures_loaded.push(texture.clone());
+        texture
+    }
 }
 
-fn load_texture(path: &str) -> u32 {
-    let mut texture = 0;
-
-    let img = image::open(path).expect("Could not open file").flipv();
+unsafe fn TextureFromFile(path: &str) -> u32 {
+    let mut textureID = 0;
+    gl::GenTextures(1, &mut textureID);
+    
+    let img = image::open(&Path::new(&path)).expect("Texture failed to load");
+    //image might need to flip
+    //let img = img.flipv();
     let format = match img {
+        ImageLuma8(_) => gl::RED,
+        ImageLumaA8(_) => gl::RG,
         ImageRgb8(_) => gl::RGB,
         ImageRgba8(_) => gl::RGBA,
-        _ => panic!("Problem with the format")
     };
+    
     let data = img.raw_pixels();
-
-    unsafe {
-        gl::GenTextures(1, &mut texture);
-        gl::BindTexture(gl::TEXTURE_2D, texture);
-
-        gl::TexImage2D(
-            gl::TEXTURE_2D,
-            0,
-            format as i32,
-            img.width() as i32,
-            img.height() as i32,
-            0,
-            format,
-            gl::UNSIGNED_BYTE,
-            &data[0] as *const u8 as *const c_void
-        );
-
-        gl::GenerateMipmap(gl::TEXTURE_2D);
-
-        //wrapping
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-        //filtering
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-    };
-
-    texture
+    
+    gl::BindTexture(gl::TEXTURE_2D, textureID);
+    gl::TexImage2D(gl::TEXTURE_2D, 0, format as i32, img.width() as i32, img.height() as i32,
+    0, format, gl::UNSIGNED_BYTE, &data[0] as *const u8 as *const c_void);
+    gl::GenerateMipmap(gl::TEXTURE_2D);
+    
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR_MIPMAP_LINEAR as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+    
+    textureID
 }
