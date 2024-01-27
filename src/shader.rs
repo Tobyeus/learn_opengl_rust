@@ -39,7 +39,7 @@ impl Shader {
             // infoLog setup
             let mut success = 0;
             let mut info_log = Vec::with_capacity(512);
-            info_log.set_len(512 - 1);
+            //info_log.set_len(512 - 1);
 
             // vertex shader
             let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
