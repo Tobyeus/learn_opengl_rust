@@ -1,0 +1,1063 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'learn_opengl_rust'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "learn_opengl_rust",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'learn_opengl_rust'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=learn_opengl_rust",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "learn_opengl_rust",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'learn_opengl_rust'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=learn_opengl_rust",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "learn_opengl_rust",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'hello_triangle'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=hello_triangle",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "hello_triangle",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'hello_triangle'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=hello_triangle",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "hello_triangle",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'hello_indexed'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=hello_indexed",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "hello_indexed",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'hello_indexed'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=hello_indexed",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "hello_indexed",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'exercise_1_1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=exercise_1_1",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_1",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'exercise_1_1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=exercise_1_1",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_1",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'exercise_1_2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=exercise_1_2",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_2",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'exercise_1_2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=exercise_1_2",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_2",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'exercise_1_3'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=exercise_1_3",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_3",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'exercise_1_3'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=exercise_1_3",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "exercise_1_3",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'interpolation'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=interpolation",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "interpolation",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'interpolation'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=interpolation",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "interpolation",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'shader_class'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=shader_class",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "shader_class",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'shader_class'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=shader_class",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "shader_class",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'textures'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=textures",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "textures",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'textures'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=textures",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "textures",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'multiple_textures'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=multiple_textures",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "multiple_textures",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'multiple_textures'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=multiple_textures",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "multiple_textures",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'transformations'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=transformations",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "transformations",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'transformations'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=transformations",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "transformations",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'coordinate_system'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=coordinate_system",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "coordinate_system",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'coordinate_system'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=coordinate_system",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "coordinate_system",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example '3D_cube'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=3D_cube",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "3D_cube",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example '3D_cube'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=3D_cube",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "3D_cube",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'cubes'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=cubes",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "cubes",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'cubes'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=cubes",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "cubes",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'camera_circle'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=camera_circle",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_circle",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'camera_circle'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=camera_circle",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_circle",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'camera_move'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=camera_move",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_move",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'camera_move'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=camera_move",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_move",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'camera_system'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=camera_system",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_system",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'camera_system'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=camera_system",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "camera_system",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'colors'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=colors",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "colors",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'colors'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=colors",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "colors",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'phong_split'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=phong_split",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_split",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'phong_split'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=phong_split",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_split",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'phong_light'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=phong_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'phong_light'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=phong_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'phong_exercise_1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=phong_exercise_1",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_exercise_1",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'phong_exercise_1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=phong_exercise_1",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_exercise_1",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'phong_material'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=phong_material",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_material",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'phong_material'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=phong_material",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "phong_material",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'lighting_maps'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=lighting_maps",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "lighting_maps",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'lighting_maps'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=lighting_maps",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "lighting_maps",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'emission_map'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=emission_map",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "emission_map",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'emission_map'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=emission_map",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "emission_map",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'directional_light'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=directional_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "directional_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'directional_light'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=directional_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "directional_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'point_light'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=point_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "point_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'point_light'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=point_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "point_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'spot_light'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=spot_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "spot_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'spot_light'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=spot_light",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "spot_light",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'multiple_lights'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=multiple_lights",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "multiple_lights",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'multiple_lights'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=multiple_lights",
+                    "--package=learn_opengl_rust"
+                ],
+                "filter": {
+                    "name": "multiple_lights",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
