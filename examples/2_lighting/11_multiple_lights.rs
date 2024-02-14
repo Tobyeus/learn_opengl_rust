@@ -193,8 +193,8 @@ fn main() {
     lighting_shader.set_float("spotLight.outerCutOff", 0.953);
 
     //cube textures
-    let diffuse_map = load_texture("./resources/container2.png");
-    let specular_map = load_texture("./resources/container2_specular.png");
+    let diffuse_map = load_texture("./resources/textures/container2.png");
+    let specular_map = load_texture("./resources/textures/container2_specular.png");
 
     //cube positions
     let cube_positions: [Vector3<f32>; 10] = [
