@@ -104,7 +104,7 @@ impl Model {
             return texture.clone();
         }
         let texture = Texture {
-            id: unsafe { TextureFromFile(path) },
+            id: unsafe { texture_from_file(path) },
             type_: typeName.into(),
             path: path.into()
         };
@@ -113,7 +113,7 @@ impl Model {
     }
 }
 
-unsafe fn TextureFromFile(path: &str) -> u32 {
+pub unsafe fn texture_from_file(path: &str) -> u32 {
     let mut textureID = 0;
     gl::GenTextures(1, &mut textureID);
     

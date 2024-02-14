@@ -137,3 +137,13 @@ path = "examples/3_model_loading/1_model_loading_backpack.rs"
 [[example]]
 name = "backpack_lighting"
 path = "examples/3_model_loading/2_backpack_lighting.rs"
+
+#Chapter4
+
+[[example]]
+name = "depth_testing"
+path = "examples/4_advanced_opengl/1_depth_test.rs"
+
+[[example]]
+name = "stencil"
+path = "examples/4_advanced_opengl/2_stencil_test.rs"

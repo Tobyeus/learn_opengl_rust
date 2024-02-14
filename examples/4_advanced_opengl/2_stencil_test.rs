@@ -5,9 +5,10 @@ use std::{ffi::c_void, mem, ptr};
 
 use glfw::{Action, Context, Key, GlfwReceiver};
 //use gl::types::*;
-use learn_opengl_rust::shader::Shader;
-use cgmath::{perspective, Deg, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
+use learn_opengl_rust::{shader::Shader, model::Model};
+use cgmath::{perspective, Deg, EuclideanSpace, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
+use learn_opengl_rust::model::texture_from_file;
 
 // Constants
 const WINDOW_WIDTH: u32 = 800;
@@ -32,11 +33,27 @@ fn main() {
 
     // enable depth perspective
     unsafe { gl::Enable(gl::DEPTH_TEST); };
+    unsafe { gl::Enable(gl::STENCIL_TEST); };
 
-    let depth_shader = Shader::new(
-        "./src/shaders/4_advanced_opengl/depth_testing.vs", 
-        "./src/shaders/4_advanced_opengl/depth_testing.fs"
+    let plane_shader = Shader::new(
+        "./src/shaders/4_advanced_opengl/stencil_testing_plane.vs", 
+        "./src/shaders/4_advanced_opengl/stencil_testing_plane.fs"
     );
+
+    let cube_shader = Shader::new(
+        "./src/shaders/4_advanced_opengl/stencil_testing_cube.vs", 
+        "./src/shaders/4_advanced_opengl/stencil_testing_cube.fs" 
+    );
+
+    let border_shader = Shader::new(
+        "./src/shaders/4_advanced_opengl/stencil_testing_cube.vs", 
+        "./src/shaders/4_advanced_opengl/stencil_testing_border.fs" 
+    );
+
+    // let basic_shader = Shader::new(
+    //     "./src/shaders/2_lighting/basic_lighting.vs", 
+    //     "./src/shaders/2_lighting/light_source.fs"
+    // );
 
     // Vertices for a 3d cube
     let cube_vertices: [f32; 180] = [
@@ -114,6 +131,8 @@ fn main() {
         let stride = (5 * mem::size_of::<f32>()) as i32;
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         gl::EnableVertexAttribArray(0);
+        gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<f32>()) as *const c_void);
+        gl::EnableVertexAttribArray(1);
 
         vao
     };
@@ -137,6 +156,8 @@ fn main() {
         let stride = (5 * mem::size_of::<f32>()) as i32;
         gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         gl::EnableVertexAttribArray(0);
+        gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, stride, (3 * mem::size_of::<f32>()) as *const c_void);
+        gl::EnableVertexAttribArray(1);
 
         vao
     };
@@ -144,14 +165,30 @@ fn main() {
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
     
     //plane object
-    depth_shader.use_program();
-    depth_shader.set_mat4("projection", projection);
-    depth_shader.set_mat4("model", Matrix4::identity());
+    plane_shader.use_program();
+    plane_shader.set_mat4("projection", projection);
+    plane_shader.set_mat4("model", Matrix4::identity());
 
-    // //cube object
-    // cube_shader.use_program();
-    // cube_shader.set_mat4("projection", projection);
-    // cube_shader.set_mat4("model", Matrix4::identity());
+    let plane_texture = unsafe {
+        let texture = texture_from_file("./resources/metal.png");
+        plane_shader.set_int("planeTex", 0);
+        texture
+    };
+
+    //cube object
+    cube_shader.use_program();
+    cube_shader.set_mat4("projection", projection);
+    cube_shader.set_mat4("model", Matrix4::identity());
+
+    let cube_texture = unsafe {
+        let texture = texture_from_file("./resources/marble.jpg");
+        cube_shader.set_int("cubeTexture", 1);
+        texture
+    };
+
+    border_shader.use_program();
+    border_shader.set_mat4("projection", projection);
+    border_shader.set_mat4("model", Matrix4::identity());
 
     //delta time
     let mut last_frame = 0.0;
@@ -170,25 +207,58 @@ fn main() {
         // render stuff here
         unsafe {
             gl::ClearColor(0.2, 0.2, 0.2, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
+
+            //set stencilmask to 0 -> 0s written to the buffer
+            gl::StencilMask(0x00);
             
             //draw plane
-            depth_shader.use_program();
+            plane_shader.use_program();
             //recalculate stuff
             let view = camera.calculate_view();
-            depth_shader.set_mat4("view", view);
-            depth_shader.set_mat4("model", Matrix4::from_translation(Vector3::new(0.0, 0.0, 0.0)));
+            plane_shader.set_mat4("view", view);
 
+            gl::ActiveTexture(gl::TEXTURE0);
+            gl::BindTexture(gl::TEXTURE_2D, plane_texture);
             gl::BindVertexArray(plane_vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 6);
+            
+            //draw first cube with texture
 
+            // parameters for StencilOp
+            // 1. sfail -> action when fails
+            // 2. dpfail -> action when stencil passes and depth test fails
+            // 3. dppass -> both stencil and depth pass
+            gl::StencilOp(gl::KEEP, gl::KEEP, gl::REPLACE);
+            gl::StencilFunc(gl::ALWAYS, 1, 0xFF);
+            //mask to 255 -> pixel value -> 1
+            gl::StencilMask(0xFF);
+
+            cube_shader.use_program();
+            cube_shader.set_mat4("view", view);
+
+            gl::ActiveTexture(gl::TEXTURE1);
+            gl::BindTexture(gl::TEXTURE_2D, cube_texture);
             gl::BindVertexArray(cube_vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
-            depth_shader.set_mat4("model", Matrix4::from_translation(Vector3::new(1.0, 0.0, 2.0)));
+            //second scaled up cube
+            gl::StencilFunc(gl::NOTEQUAL, 1, 0xFF);
+            gl::StencilMask(0x00);
+            gl::Disable(gl::DEPTH_TEST);
 
+            border_shader.use_program();
+            border_shader.set_mat4("view", view);
+            border_shader.set_mat4("model", Matrix4::from_scale(1.1));
+
+            gl::ActiveTexture(gl::TEXTURE1);
+            gl::BindTexture(gl::TEXTURE_2D, cube_texture);
             gl::BindVertexArray(cube_vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
+
+            gl::StencilMask(0xFF);
+            gl::StencilFunc(gl::ALWAYS, 0, 0xFF);
+            gl::Enable(gl::DEPTH_TEST);
         }
     
         // Swap front and back buffers
