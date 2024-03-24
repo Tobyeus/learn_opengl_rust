@@ -33,19 +33,19 @@ Make sure to use ```cargo build``` before running anything. Since GLFW is used a
 
 2. Lighting
 
--colors
--phong_split
--phong_lighting
--phong_exercise_1
--phong_material
--lighting_maps
--emission_map
--directional_light
--pooint_light
--spot_light
--multiple_lights
+- colors
+- phong_split
+- phong_lighting
+- phong_exercise_1
+- phong_material
+- lighting_maps
+- emission_map
+- directional_light
+- pooint_light
+- spot_light
+- multiple_lights
 
 3. Models
 
--backpack
--backpack_lighting
+- backpack
+- backpack_lighting
