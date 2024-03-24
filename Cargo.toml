@@ -93,7 +93,7 @@ name = "phong_split"
 path = "examples/2_lighting/2_ambient_diffuse_specular.rs"
 
 [[example]]
-name = "phong_light"
+name = "phong_lighting"
 path = "examples/2_lighting/3_phong_lighting.rs"
 
 [[example]]
