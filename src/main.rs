@@ -1,6 +1,4 @@
-//extern crate glfw;
-//extern crate gl;
-use std::process::{Command, Output};
+use std::process::Command;
 
 fn main() {
     println!("Hey, you are running the Learn-OpenGL-Rust Project by Tobyeus.");

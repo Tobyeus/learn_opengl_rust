@@ -92,7 +92,7 @@ fn main() {
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
 
-        let texture_image = image::open(&Path::new("resources/container.jpg")).expect("Could not open the file");
+        let texture_image = image::open(&Path::new("resources/textures/container.jpg")).expect("Could not open the file");
         let data = texture_image.raw_pixels();
 
         gl::TexImage2D(

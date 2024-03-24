@@ -97,7 +97,7 @@ fn main() {
         // more info https://learnopengl.com/Getting-started/Textures
 
         // store image, flip vertically
-        let texture_image = image::open(&Path::new("resources/container.jpg")).expect("Could not open the file").flipv();
+        let texture_image = image::open(&Path::new("resources/textures/container.jpg")).expect("Could not open the file").flipv();
         // set data as raw_pixels
         let data = texture_image.raw_pixels();
 
@@ -115,7 +115,7 @@ fn main() {
         // generate Mipmap
         gl::GenerateMipmap(gl::TEXTURE_2D);
 
-        let texture_image = image::open("resources/awesomeface.png").expect("Could not open file").flipv();
+        let texture_image = image::open("resources/textures/awesomeface.png").expect("Could not open file").flipv();
         let data = texture_image.raw_pixels();
 
         gl::GenTextures(1, &mut texture2);

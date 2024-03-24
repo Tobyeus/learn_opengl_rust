@@ -147,3 +147,11 @@ path = "examples/4_advanced_opengl/1_depth_test.rs"
 [[example]]
 name = "stencil"
 path = "examples/4_advanced_opengl/2_stencil_test.rs"
+
+[[example]]
+name = "blending"
+path = "examples/4_advanced_opengl/3_blending.rs"
+
+[[example]]
+name = "face_culling"
+path = "examples/4_advanced_opengl/4_face_culling.rs"

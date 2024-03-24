@@ -6,7 +6,7 @@ use std::{ffi::c_void, mem, ptr};
 use glfw::{Action, Context, Key, GlfwReceiver};
 //use gl::types::*;
 use learn_opengl_rust::{shader::Shader, model::Model};
-use cgmath::{perspective, Deg, EuclideanSpace, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
+use cgmath::{perspective, Deg, EuclideanSpace, Matrix4, Point3, Vector2, Vector3};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants

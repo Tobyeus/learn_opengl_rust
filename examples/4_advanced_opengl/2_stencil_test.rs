@@ -5,8 +5,8 @@ use std::{ffi::c_void, mem, ptr};
 
 use glfw::{Action, Context, Key, GlfwReceiver};
 //use gl::types::*;
-use learn_opengl_rust::{shader::Shader, model::Model};
-use cgmath::{perspective, Deg, EuclideanSpace, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
+use learn_opengl_rust::{shader::Shader};
+use cgmath::{perspective, Deg, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 use learn_opengl_rust::model::texture_from_file;
 
@@ -49,11 +49,6 @@ fn main() {
         "./src/shaders/4_advanced_opengl/stencil_testing_cube.vs", 
         "./src/shaders/4_advanced_opengl/stencil_testing_border.fs" 
     );
-
-    // let basic_shader = Shader::new(
-    //     "./src/shaders/2_lighting/basic_lighting.vs", 
-    //     "./src/shaders/2_lighting/light_source.fs"
-    // );
 
     // Vertices for a 3d cube
     let cube_vertices: [f32; 180] = [
@@ -170,7 +165,7 @@ fn main() {
     plane_shader.set_mat4("model", Matrix4::identity());
 
     let plane_texture = unsafe {
-        let texture = texture_from_file("./resources/metal.png");
+        let texture = texture_from_file("./resources/textures/metal.png");
         plane_shader.set_int("planeTex", 0);
         texture
     };
@@ -181,7 +176,7 @@ fn main() {
     cube_shader.set_mat4("model", Matrix4::identity());
 
     let cube_texture = unsafe {
-        let texture = texture_from_file("./resources/marble.jpg");
+        let texture = texture_from_file("./resources/textures/marble.jpg");
         cube_shader.set_int("cubeTexture", 1);
         texture
     };
