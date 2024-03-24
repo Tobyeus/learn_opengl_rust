@@ -110,8 +110,8 @@ fn main() {
         gl::EnableVertexAttribArray(1);
 
         // textures
-        let texture1 = load_texture("resources/container.jpg");
-        let texture2 = load_texture("resources/awesomeface.png");
+        let texture1 = load_texture("resources/textures/container.jpg");
+        let texture2 = load_texture("resources/textures/awesomeface.png");
         
         // clean up? I think this is not mandatory
         // unbind VBO

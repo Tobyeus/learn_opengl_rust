@@ -93,7 +93,7 @@ name = "phong_split"
 path = "examples/2_lighting/2_ambient_diffuse_specular.rs"
 
 [[example]]
-name = "phong_light"
+name = "phong_lighting"
 path = "examples/2_lighting/3_phong_lighting.rs"
 
 [[example]]
@@ -137,3 +137,21 @@ path = "examples/3_model_loading/1_model_loading_backpack.rs"
 [[example]]
 name = "backpack_lighting"
 path = "examples/3_model_loading/2_backpack_lighting.rs"
+
+#Chapter4
+
+[[example]]
+name = "depth_testing"
+path = "examples/4_advanced_opengl/1_depth_test.rs"
+
+[[example]]
+name = "stencil"
+path = "examples/4_advanced_opengl/2_stencil_test.rs"
+
+[[example]]
+name = "blending"
+path = "examples/4_advanced_opengl/3_blending.rs"
+
+[[example]]
+name = "face_culling"
+path = "examples/4_advanced_opengl/4_face_culling.rs"

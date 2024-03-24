@@ -147,8 +147,8 @@ fn main() {
 
     //texture
 
-    let diffuse_map = load_texture("./resources/container2.png");
-    let specular_map = load_texture("./resources/container2_specular.png");
+    let diffuse_map = load_texture("./resources/textures/container2.png");
+    let specular_map = load_texture("./resources/textures/container2_specular.png");
     
     //material
     lighting_shader.set_int("material.diffuseTex", 0);

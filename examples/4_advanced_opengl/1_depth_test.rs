@@ -5,8 +5,8 @@ use std::{ffi::c_void, mem, ptr};
 
 use glfw::{Action, Context, Key, GlfwReceiver};
 //use gl::types::*;
-use learn_opengl_rust::{shader::Shader, model::Model};
-use cgmath::{perspective, Deg, EuclideanSpace, Matrix4, Point3, Vector2, Vector3};
+use learn_opengl_rust::shader::Shader;
+use cgmath::{perspective, Deg, Matrix4, Point3, SquareMatrix, Vector2, Vector3};
 use learn_opengl_rust::camera::{Camera, CameraMovement};
 
 // Constants
@@ -33,65 +33,69 @@ fn main() {
     // enable depth perspective
     unsafe { gl::Enable(gl::DEPTH_TEST); };
 
-    let model_shader = Shader::new(
-        "./src/shaders/3_model_loading/model_lighting.vs", 
-        "./src/shaders/3_model_loading/model_lighting.fs"
-    );
-
-    let basic_shader = Shader::new(
-        "./src/shaders/2_lighting/basic_lighting.vs", 
-        "./src/shaders/2_lighting/light_source.fs"
+    let depth_shader = Shader::new(
+        "./src/shaders/4_advanced_opengl/depth_testing.vs", 
+        "./src/shaders/4_advanced_opengl/depth_testing.fs"
     );
 
     // Vertices for a 3d cube
-    let vertices_light: [f32; 108] = [
-        // positions      
-        // vec3           
-        -0.5, -0.5, -0.5, 
-         0.5, -0.5, -0.5, 
-         0.5,  0.5, -0.5, 
-         0.5,  0.5, -0.5, 
-        -0.5,  0.5, -0.5,
-        -0.5, -0.5, -0.5,
+    let cube_vertices: [f32; 180] = [
+        // positions       // texture Coords
+        -0.5, -0.5, -0.5,  0.0, 0.0,
+         0.5, -0.5, -0.5,  1.0, 0.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 0.0,
 
-        -0.5, -0.5,  0.5,
-         0.5, -0.5,  0.5,
-         0.5,  0.5,  0.5,
-         0.5,  0.5,  0.5,
-        -0.5,  0.5,  0.5,
-        -0.5, -0.5,  0.5,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 1.0,
+         0.5,  0.5,  0.5,  1.0, 1.0,
+        -0.5,  0.5,  0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
 
-        -0.5,  0.5,  0.5,
-        -0.5,  0.5, -0.5,
-        -0.5, -0.5, -0.5,
-        -0.5, -0.5, -0.5,
-        -0.5, -0.5,  0.5,
-        -0.5,  0.5,  0.5,
+        -0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5,  0.5,  1.0, 0.0,
 
-         0.5,  0.5,  0.5,
-         0.5,  0.5, -0.5, 
-         0.5, -0.5, -0.5, 
-         0.5, -0.5, -0.5,  
-         0.5, -0.5,  0.5,  
-         0.5,  0.5,  0.5,  
+         0.5,  0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5,  0.5,  0.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
 
-        -0.5, -0.5, -0.5,
-         0.5, -0.5, -0.5,  
-         0.5, -0.5,  0.5,
-         0.5, -0.5,  0.5,  
-        -0.5, -0.5,  0.5,  
-        -0.5, -0.5, -0.5,  
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5, -0.5,  1.0, 1.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
 
-        -0.5,  0.5, -0.5,  
-         0.5,  0.5, -0.5,  
-         0.5,  0.5,  0.5,  
-         0.5,  0.5,  0.5,  
-        -0.5,  0.5,  0.5,  
-        -0.5,  0.5, -0.5, 
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0
+   ];
+
+    let plane_vertices: [f32; 30] = [
+        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         5.0, -0.5,  5.0,  2.0, 0.0,
+        -5.0, -0.5,  5.0,  0.0, 0.0,
+        -5.0, -0.5, -5.0,  0.0, 2.0,
+
+         5.0, -0.5,  5.0,  2.0, 0.0,
+        -5.0, -0.5, -5.0,  0.0, 2.0,
+         5.0, -0.5, -5.0,  2.0, 2.0
     ];
 
-    //
-    let vao = unsafe {
+    let plane_vao = unsafe {
         let (mut vbo, mut vao) = (0,0);
 
         gl::GenBuffers(1, &mut vbo);
@@ -102,44 +106,52 @@ fn main() {
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (vertices_light.len() * mem::size_of::<f32>()) as isize,
-            &vertices_light[0] as *const f32 as *const c_void,
+            (plane_vertices.len() * mem::size_of::<f32>()) as isize,
+            &plane_vertices[0] as *const f32 as *const c_void,
             gl::STATIC_DRAW
         );
 
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (3 * mem::size_of::<f32>()) as i32, ptr::null());
+        let stride = (5 * mem::size_of::<f32>()) as i32;
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
         gl::EnableVertexAttribArray(0);
 
         vao
     };
 
-    let model = Model::new("./resources/obj/backpack", "backpack.obj");
+    let cube_vao = unsafe {
+        let (mut vbo, mut vao) = (0,0);
+
+        gl::GenBuffers(1, &mut vbo);
+        gl::GenVertexArrays(1, &mut vao);
+        
+        gl::BindVertexArray(vao);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (cube_vertices.len() * mem::size_of::<f32>()) as isize,
+            &cube_vertices[0] as *const f32 as *const c_void,
+            gl::STATIC_DRAW
+        );
+
+        let stride = (5 * mem::size_of::<f32>()) as i32;
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
+        gl::EnableVertexAttribArray(0);
+
+        vao
+    };
+
     let projection = perspective(Deg(45.0), WINDOW_WIDTH as f32/WINDOW_HEIGHT as f32, 0.1, 100.0);
     
-    //model
-    model_shader.use_program();
-    model_shader.set_mat4("projection", projection);
-    model_shader.set_mat4("model", Matrix4::from_translation(Vector3::new(0.0, 0.0, 0.0)) * Matrix4::from_scale(0.5));
-    
-    //light uniform
-    let ambient = Vector3::new(0.5, 0.5, 0.5);
-    let diffuse = Vector3::new(0.8, 0.8, 0.8);
-    let specular = Vector3::new(1.0, 1.0, 1.0);
-    let constant = 1.0;
-    let linear = 0.09;
-    let quadratic = 0.032;
+    //plane object
+    depth_shader.use_program();
+    depth_shader.set_mat4("projection", projection);
+    depth_shader.set_mat4("model", Matrix4::identity());
 
-    model_shader.set_vector3v("light.ambient",ambient);
-    model_shader.set_vector3v("light.diffuse", diffuse);
-    model_shader.set_vector3v("light.specular", specular);
-    model_shader.set_float("light.constant", constant);
-    model_shader.set_float("light.linear", linear);
-    model_shader.set_float("light.quadratic", quadratic);
-
-    //cube
-    let mut light_position = Vector3::new(2.0, 2.0, 2.0);
-    basic_shader.use_program();
-    basic_shader.set_mat4("projection", projection);
+    // //cube object
+    // cube_shader.use_program();
+    // cube_shader.set_mat4("projection", projection);
+    // cube_shader.set_mat4("model", Matrix4::identity());
 
     //delta time
     let mut last_frame = 0.0;
@@ -151,14 +163,6 @@ fn main() {
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
 
-        let light_x = (2.0 * (glfw.get_time() * 2.0).cos()) as f32;
-        let light_y = (glfw.get_time() * 1.0).cos() as f32;
-        let light_z = (2.0 * (glfw.get_time() * 2.0).sin()) as f32;
-
-        light_position.x = light_x;
-        light_position.y = light_y;
-        light_position.z = light_z;
-
         // processing events here
         process_events(&events, &mut camera);
         process_input_keyboard(&mut window, delta_time, &mut camera);
@@ -167,21 +171,23 @@ fn main() {
         unsafe {
             gl::ClearColor(0.2, 0.2, 0.2, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
-            model_shader.use_program();
+            
+            //draw plane
+            depth_shader.use_program();
             //recalculate stuff
             let view = camera.calculate_view();
-            model_shader.set_mat4("view", view);
-            model_shader.set_vector3v("light.position", light_position);
-            model_shader.set_vector3v("cameraPos", camera.position.to_vec());
-            model.Draw(&model_shader);
+            depth_shader.set_mat4("view", view);
+            depth_shader.set_mat4("model", Matrix4::from_translation(Vector3::new(0.0, 0.0, 0.0)));
 
-            //stuff for lighting
-            basic_shader.use_program();
-            gl::BindVertexArray(vao);
-            basic_shader.set_mat4("model", Matrix4::from_translation(light_position) * Matrix4::from_scale(0.1) );
-            basic_shader.set_mat4("view", view);
+            gl::BindVertexArray(plane_vao);
+            gl::DrawArrays(gl::TRIANGLES, 0, 6);
 
+            gl::BindVertexArray(cube_vao);
+            gl::DrawArrays(gl::TRIANGLES, 0, 36);
+
+            depth_shader.set_mat4("model", Matrix4::from_translation(Vector3::new(1.0, 0.0, 2.0)));
+
+            gl::BindVertexArray(cube_vao);
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
         }
     
