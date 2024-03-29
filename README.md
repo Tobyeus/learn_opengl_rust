@@ -56,7 +56,7 @@ Make sure to use ```cargo build``` before running anything. Since GLFW is used a
 
 ## Showcase
 
-This section will show a few examples that this project could produce.
+This section will show a few examples that this project can produce.
 
 ### [3D Cube with transformations](./examples/1_getting_started/12_cube_3d.rs)
 
