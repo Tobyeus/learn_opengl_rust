@@ -10,7 +10,10 @@ Start with [Hello Triangle!](./examples/1_getting_started/1_hello_triangle.rs)
 
 # Structure
 
-As of now, I will mainly code in the main.rs file of the src folder. Finished chapters will be converted into examples, which can be run separately.
+~~As of now, I will mainly code in the main.rs file of the src folder. Finished chapters will be converted into examples, which can be run separately.~~
+\
+\
+The main.rs file is now working as a CLI Tool to display examples. When running the program, it will ask you for an example name and run it with a seperate cargo command. You find the names for each example below or in the cargo.toml file. Entering an empty string will also show the full list of examples.
 
 # How to use the examples
 
